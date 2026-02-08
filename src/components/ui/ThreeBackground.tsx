@@ -184,9 +184,13 @@ function FloatingOrbs() {
   );
 }
 
-export function ThreeBackground() {
+export function ThreeBackground({
+  className = 'fixed inset-0 -z-10 bg-navy',
+}: {
+  className?: string;
+}) {
   return (
-    <div className="fixed inset-0 -z-10 bg-navy">
+    <div className={className}>
       <Canvas 
         camera={{ position: [0, 0, 35], fov: 75 }}
         gl={{ alpha: true, antialias: true }}

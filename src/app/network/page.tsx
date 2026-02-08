@@ -326,8 +326,8 @@ export default function NetworkPage() {
 
   return (
     <div className="min-h-screen bg-[#0A1128] relative">
-      {/* Same background as landing */}
-      <ThreeBackground />
+      {/* Same background as landing (ensure it's actually visible) */}
+      <ThreeBackground className="fixed inset-0 z-0 pointer-events-none bg-navy" />
 
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[#0A1128]/80 border-b border-[#00F5FF]/10">
@@ -371,7 +371,7 @@ export default function NetworkPage() {
             <div className="flex flex-col items-center">
               {/* Graph Container */}
               <div className="relative w-full max-w-[500px] aspect-square">
-                <div className="absolute inset-0 bg-[#0A1128]/60 backdrop-blur-sm rounded-2xl border border-[#00F5FF]/10" />
+                <div className="absolute inset-0 bg-[#0A1128]/25 backdrop-blur-sm rounded-2xl border border-[#00F5FF]/15" />
                 <div className="relative z-10 w-full h-full flex items-center justify-center p-4">
                   <NetworkGraph 
                     providers={providers} 
