@@ -7,4 +7,5 @@ export { StatCard } from './StatCard';
 export { ProgressBar } from './ProgressBar';
 export { ParticlesBackground } from './ParticlesBackground';
 export { AnimatedGrid } from './AnimatedGrid';
+export { ThreeBackground } from './ThreeBackground';
 export { DemoToggle, DemoProvider, useDemo } from './DemoToggle';
