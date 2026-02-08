@@ -220,11 +220,16 @@ export default function MarketplacePage() {
                       </div>
                     </div>
 
-                    {/* Hardware & Location */}
+                    {/* Hardware, Location & ENS */}
                     {isDemoProvider && (
-                      <div className="flex items-center gap-4 mb-4 text-sm text-[#A2AAAD]">
+                      <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-[#A2AAAD]">
                         <span>🖥️ {(provider as DemoProvider).hardware}</span>
                         <span>📍 {(provider as DemoProvider).location}</span>
+                        {(provider as DemoProvider).ensName && (
+                          <span className="text-[#00F5FF]">
+                            🔗 {(provider as DemoProvider).ensName}
+                          </span>
+                        )}
                       </div>
                     )}
 

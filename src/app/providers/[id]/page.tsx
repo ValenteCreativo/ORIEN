@@ -7,7 +7,7 @@ import { PageWrapper } from '@/components/layout';
 import { useDemo } from '@/components/ui';
 import { DEMO_PROVIDERS, CATEGORY_INFO, type DemoProvider } from '@/lib/demo-data';
 
-type SimulationStep = 'idle' | 'connecting' | 'session-created' | 'executing' | 'completed' | 'settling' | 'settled';
+type SimulationStep = 'idle' | 'wallet-prompt' | 'connecting' | 'session-created' | 'executing' | 'completed' | 'settling' | 'settled';
 
 export default function ProviderDetailPage() {
   const params = useParams();
@@ -45,9 +45,19 @@ export default function ProviderDetailPage() {
     }
   }, [providerId, demoMode]);
 
+  const [showWalletModal, setShowWalletModal] = useState(false);
+
   const runSimulation = async () => {
     if (!provider || !selectedTool) return;
 
+    // Step 0: Wallet prompt
+    setSimulationStep('wallet-prompt');
+    setShowWalletModal(true);
+  };
+
+  const confirmWalletTx = async () => {
+    setShowWalletModal(false);
+    
     // Step 1: Connecting
     setSimulationStep('connecting');
     await sleep(1000);
@@ -87,6 +97,12 @@ export default function ProviderDetailPage() {
   const resetSimulation = () => {
     setSimulationStep('idle');
     setExecutionTime(0);
+    setShowWalletModal(false);
+  };
+
+  const cancelWallet = () => {
+    setSimulationStep('idle');
+    setShowWalletModal(false);
   };
 
   const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -358,6 +374,7 @@ export default function ProviderDetailPage() {
                       'text-[#00F5FF]'
                     }`}>
                       {simulationStep === 'idle' && 'Ready'}
+                      {simulationStep === 'wallet-prompt' && 'Awaiting Wallet...'}
                       {simulationStep === 'connecting' && 'Connecting...'}
                       {simulationStep === 'session-created' && 'Session Active'}
                       {simulationStep === 'executing' && 'Executing...'}
@@ -386,11 +403,28 @@ export default function ProviderDetailPage() {
                   )}
 
                   {simulationStep === 'settled' && (
-                    <div className="text-center py-2">
-                      <div className="text-2xl font-bold text-green-400">
-                        ${(cost / 100).toFixed(2)}
+                    <div className="space-y-4">
+                      <div className="text-center py-2">
+                        <div className="text-2xl font-bold text-green-400">
+                          ${(cost / 100).toFixed(2)}
+                        </div>
+                        <div className="text-xs text-[#A2AAAD]">Session Cost (USDC)</div>
                       </div>
-                      <div className="text-xs text-[#A2AAAD]">Session Cost (USDC)</div>
+                      
+                      {/* Connection Instructions */}
+                      <div className="p-4 bg-[#00F5FF]/10 rounded-xl border border-[#00F5FF]/20">
+                        <div className="text-sm font-medium text-[#00F5FF] mb-2">🔗 Connect Your Agent</div>
+                        <div className="text-xs text-[#A2AAAD] space-y-2">
+                          <p>Your session is ready. Connect using:</p>
+                          <div className="bg-[#0A1128] p-2 rounded font-mono text-[10px] text-[#00F5FF]">
+                            orien connect --provider {provider?.id}
+                          </div>
+                          <p>Or via API:</p>
+                          <div className="bg-[#0A1128] p-2 rounded font-mono text-[10px] text-[#00F5FF] break-all">
+                            POST https://api.orien.dev/v1/sessions/{'{session_id}'}/execute
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -443,6 +477,62 @@ export default function ProviderDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Wallet Modal */}
+        {showWalletModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <div className="bg-[#0A1128] border border-[#A2AAAD]/20 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 mx-auto mb-4 bg-[#00F5FF]/10 rounded-full flex items-center justify-center">
+                  <span className="text-3xl">🔐</span>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Confirm Transaction</h3>
+                <p className="text-sm text-[#A2AAAD]">
+                  Authorize budget allocation for this session
+                </p>
+              </div>
+
+              <div className="bg-[#0A1128]/80 border border-[#A2AAAD]/10 rounded-xl p-4 mb-6 space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#A2AAAD]">Provider</span>
+                  <span className="text-white">{provider?.name}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#A2AAAD]">Tool</span>
+                  <span className="text-white">{provider?.tools.find(t => t.id === selectedTool)?.name}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#A2AAAD]">Max Budget</span>
+                  <span className="text-[#00F5FF] font-medium">${(budget / 100).toFixed(2)} USDC</span>
+                </div>
+                <div className="pt-3 border-t border-[#A2AAAD]/10">
+                  <div className="text-xs text-[#A2AAAD]/60">
+                    You only pay for effective execution time. Unused budget is returned.
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={cancelWallet}
+                  className="flex-1 py-3 text-sm font-medium border border-[#A2AAAD]/30 text-[#A2AAAD] rounded-full hover:border-[#00F5FF]/50 hover:text-[#00F5FF] transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmWalletTx}
+                  className="flex-1 py-3 text-sm font-medium bg-[#00F5FF] text-[#0A1128] rounded-full hover:shadow-[0_0_20px_rgba(0,245,255,0.3)] transition-all"
+                >
+                  ✓ Confirm
+                </button>
+              </div>
+
+              <div className="mt-4 text-center text-xs text-[#A2AAAD]/40">
+                Demo Mode — No real transaction will be sent
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </PageWrapper>
   );

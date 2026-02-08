@@ -8,6 +8,7 @@ export interface DemoProvider {
   tagline: string;
   category: ProviderCategory;
   walletAddress: string;
+  ensName?: string;
   status: 'online' | 'offline' | 'busy';
   pricePerMinute: number;
   tools: {
@@ -37,6 +38,7 @@ export const DEMO_PROVIDERS: DemoProvider[] = [
     tagline: 'Where pixels become reality',
     category: 'creative',
     walletAddress: '0x1a2b...3c4d',
+    ensName: 'neoncanvas.eth',
     status: 'online',
     pricePerMinute: 45,
     tools: [
@@ -70,6 +72,7 @@ export const DEMO_PROVIDERS: DemoProvider[] = [
     tagline: '3D rendering at lightspeed',
     category: 'creative',
     walletAddress: '0x5e6f...7g8h',
+    ensName: 'pixelforge.eth',
     status: 'online',
     pricePerMinute: 85,
     tools: [
@@ -114,6 +117,7 @@ export const DEMO_PROVIDERS: DemoProvider[] = [
     tagline: 'Train faster. Deploy smarter.',
     category: 'ai-ml',
     walletAddress: '0x9i0j...1k2l',
+    ensName: 'neuralnexus.eth',
     status: 'online',
     pricePerMinute: 150,
     tools: [

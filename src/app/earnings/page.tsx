@@ -112,6 +112,44 @@ export default function EarningsPage() {
           <p className="text-[#A2AAAD]">Track your compute revenue and manage reinvestment</p>
         </div>
 
+        {/* Your Hardware - Demo Mode */}
+        {demoMode && (
+          <div className="bg-gradient-to-r from-[#00F5FF]/10 to-purple-500/10 rounded-xl border border-[#00F5FF]/20 p-6 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold text-white">Your Hardware</h2>
+              <span className="text-xs text-green-400">● All Online</span>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="bg-[#0A1128]/60 rounded-xl p-4 border border-[#A2AAAD]/10">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-xl">🖥️</span>
+                  <div>
+                    <div className="font-medium text-white">Mac Studio M2 Ultra</div>
+                    <div className="text-xs text-[#A2AAAD]">Neon Canvas Provider</div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-[#A2AAAD]">Rate: $0.45/min</span>
+                  <span className="text-green-400">12 sessions today</span>
+                </div>
+              </div>
+              <div className="bg-[#0A1128]/60 rounded-xl p-4 border border-[#A2AAAD]/10">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-xl">🎮</span>
+                  <div>
+                    <div className="font-medium text-white">RTX 4090 × 2</div>
+                    <div className="text-xs text-[#A2AAAD]">Pixel Forge Provider</div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-[#A2AAAD]">Rate: $0.85/min</span>
+                  <span className="text-green-400">8 sessions today</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Overview Cards */}
         <div className="grid md:grid-cols-3 gap-4 mb-10">
           {/* Total Earnings */}
