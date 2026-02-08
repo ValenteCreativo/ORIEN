@@ -265,11 +265,18 @@ export default function MarketplacePage() {
                       </div>
 
                       {isAvailable ? (
-                        <Link href={`/sessions/new?provider=${provider.id}`}>
-                          <button className="px-5 py-2 text-sm font-medium bg-[#00F5FF] text-[#0A1128] rounded-full hover:shadow-[0_0_20px_rgba(0,245,255,0.3)] transition-all">
-                            Start Session →
-                          </button>
-                        </Link>
+                        <div className="flex items-center gap-2">
+                          <Link href={`/providers/${provider.id}`}>
+                            <button className="px-4 py-2 text-sm font-medium border border-[#A2AAAD]/30 text-[#A2AAAD] rounded-full hover:border-[#00F5FF]/50 hover:text-[#00F5FF] transition-all">
+                              View Details
+                            </button>
+                          </Link>
+                          <Link href={`/sessions/new?provider=${provider.id}`}>
+                            <button className="px-5 py-2 text-sm font-medium bg-[#00F5FF] text-[#0A1128] rounded-full hover:shadow-[0_0_20px_rgba(0,245,255,0.3)] transition-all">
+                              Start Session →
+                            </button>
+                          </Link>
+                        </div>
                       ) : (
                         <button
                           disabled
