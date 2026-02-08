@@ -1,14 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Session, Provider, ApiResponse } from '@/types';
 import { PageWrapper } from '@/components/layout';
+import { useDemo } from '@/components/ui';
+import { DEMO_PROVIDERS, DEMO_SESSIONS } from '@/lib/demo-data';
 
 export default function SessionDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const sessionId = params.id as string;
+  const { demoMode } = useDemo();
+
+  const demoBudget = useMemo(() => {
+    const b = searchParams.get('budget');
+    const parsed = b ? parseInt(b, 10) : NaN;
+    return Number.isFinite(parsed) ? parsed : null;
+  }, [searchParams]);
 
   const [session, setSession] = useState<Session | null>(null);
   const [provider, setProvider] = useState<Provider | null>(null);
@@ -19,13 +29,72 @@ export default function SessionDetailPage() {
   useEffect(() => {
     if (!sessionId) return;
 
+    // Demo path: resolve sessions/providers locally
+    if (demoMode) {
+      try {
+        // 1) sessions/new creates ses_demo_<providerId>
+        if (sessionId.startsWith('ses_demo_')) {
+          const providerId = sessionId.replace('ses_demo_', '');
+          const demoProvider = (DEMO_PROVIDERS as unknown as Provider[]).find(p => p.id === providerId);
+          if (!demoProvider) throw new Error('Session not found');
+
+          const budgetAllowance = demoBudget ?? 10000;
+          const consumed = Math.min(1850, Math.max(0, Math.floor(budgetAllowance * 0.18)));
+
+          const demoSession: Session = {
+            id: sessionId,
+            agentId: 'agent-demo',
+            providerId,
+            status: 'active',
+            budgetAllowance,
+            consumed,
+            effectiveTimeMs: 22 * 60 * 1000,
+            executions: [
+              {
+                id: `exec_${sessionId}`,
+                sessionId,
+                toolId: demoProvider.tools[0]?.id ?? 'tool-demo',
+                args: { task: 'demo-mission' },
+                status: 'running',
+                startedAt: new Date(Date.now() - 8 * 60 * 1000),
+                endedAt: undefined,
+                durationMs: undefined,
+                cost: consumed,
+                result: undefined,
+              },
+            ],
+            createdAt: new Date(Date.now() - 25 * 60 * 1000),
+          };
+
+          setSession(demoSession);
+          setProvider(demoProvider);
+          setLoading(false);
+          return;
+        }
+
+        // 2) fallback to DEMO_SESSIONS (from demo-data.ts)
+        const demoSession = (DEMO_SESSIONS as unknown as Session[]).find(s => s.id === sessionId);
+        if (!demoSession) throw new Error('Session not found');
+
+        const demoProvider = (DEMO_PROVIDERS as unknown as Provider[]).find(p => p.id === demoSession.providerId) ?? null;
+        setSession(demoSession);
+        setProvider(demoProvider);
+        setLoading(false);
+        return;
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Session not found');
+        setLoading(false);
+        return;
+      }
+    }
+
     Promise.all([
       fetch(`/api/sessions/${sessionId}`).then(res => res.json()),
     ])
       .then(([sessionData]) => {
         if (sessionData.success && sessionData.data) {
           setSession(sessionData.data);
-          
+
           // Fetch provider details
           return fetch(`/api/providers/${sessionData.data.providerId}`).then(res => res.json());
         } else {
@@ -39,7 +108,7 @@ export default function SessionDetailPage() {
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
-  }, [sessionId]);
+  }, [sessionId, demoMode, demoBudget]);
 
   if (loading) {
     return (

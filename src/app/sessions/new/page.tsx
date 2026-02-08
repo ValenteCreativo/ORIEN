@@ -4,6 +4,8 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Provider, ApiResponse } from '@/types';
 import { PageWrapper } from '@/components/layout';
+import { useDemo } from '@/components/ui';
+import { DEMO_PROVIDERS } from '@/lib/demo-data';
 
 // Loading component for Suspense fallback
 function LoadingState() {
@@ -25,6 +27,7 @@ function NewSessionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const providerId = searchParams.get('provider');
+  const { demoMode } = useDemo();
 
   const [provider, setProvider] = useState<Provider | null>(null);
   const [budget, setBudget] = useState('1000'); // cents = $10
@@ -35,6 +38,16 @@ function NewSessionContent() {
   useEffect(() => {
     if (!providerId) {
       setError('No provider selected');
+      return;
+    }
+
+    if (demoMode) {
+      const demoProvider = (DEMO_PROVIDERS as unknown as Provider[]).find(p => p.id === providerId);
+      if (demoProvider) {
+        setProvider(demoProvider);
+      } else {
+        setError('Provider not found');
+      }
       return;
     }
 
@@ -57,6 +70,12 @@ function NewSessionContent() {
     setError(null);
 
     try {
+      if (demoMode) {
+        const demoSessionId = `ses_demo_${provider.id}`;
+        router.push(`/sessions/${demoSessionId}?budget=${budget}`);
+        return;
+      }
+
       const res = await fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
