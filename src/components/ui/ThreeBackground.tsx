@@ -9,21 +9,19 @@ function ParticleField() {
   const ref = useRef<THREE.Points>(null);
   
   const particles = useMemo(() => {
-    const positions = new Float32Array(5000 * 3);
-    
-    for (let i = 0; i < 5000; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 100;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
+    const positions = new Float32Array(3000 * 3);
+    for (let i = 0; i < 3000; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 80;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 80;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 80;
     }
-    
     return positions;
   }, []);
 
   useFrame((state) => {
     if (ref.current) {
-      ref.current.rotation.x = state.clock.elapsedTime * 0.05;
-      ref.current.rotation.y = state.clock.elapsedTime * 0.075;
+      ref.current.rotation.x = state.clock.elapsedTime * 0.02;
+      ref.current.rotation.y = state.clock.elapsedTime * 0.03;
     }
   });
 
@@ -32,44 +30,56 @@ function ParticleField() {
       <PointMaterial
         transparent
         color="#00F5FF"
-        size={0.15}
+        size={0.08}
         sizeAttenuation={true}
         depthWrite={false}
-        opacity={0.8}
+        opacity={0.6}
+        blending={THREE.AdditiveBlending}
       />
     </Points>
   );
 }
 
-function WaveGrid() {
+function FloatingGrid() {
   const mesh = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
-    if (mesh.current && mesh.current.geometry) {
-      const time = state.clock.elapsedTime;
-      const positionAttribute = mesh.current.geometry.getAttribute('position');
-      
-      if (positionAttribute) {
-        for (let i = 0; i < positionAttribute.count; i++) {
-          const x = positionAttribute.getX(i);
-          const y = positionAttribute.getY(i);
-          const wave = Math.sin(x * 0.5 + time) * Math.cos(y * 0.5 + time) * 2;
-          positionAttribute.setZ(i, wave);
-        }
-        
-        positionAttribute.needsUpdate = true;
-      }
+    if (mesh.current) {
+      mesh.current.rotation.x = -Math.PI / 3;
+      mesh.current.position.y = -15 + Math.sin(state.clock.elapsedTime * 0.3) * 2;
     }
   });
 
   return (
-    <mesh ref={mesh} rotation={[-Math.PI / 2, 0, 0]} position={[0, -5, 0]}>
-      <planeGeometry args={[50, 50, 50, 50]} />
-      <meshStandardMaterial
+    <mesh ref={mesh} position={[0, -15, -20]}>
+      <planeGeometry args={[100, 100, 40, 40]} />
+      <meshBasicMaterial
         color="#00F5FF"
         wireframe
         transparent
-        opacity={0.2}
+        opacity={0.08}
+      />
+    </mesh>
+  );
+}
+
+function GlowOrb() {
+  const mesh = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    if (mesh.current) {
+      mesh.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 3;
+      mesh.current.rotation.y = state.clock.elapsedTime * 0.2;
+    }
+  });
+
+  return (
+    <mesh ref={mesh} position={[0, 0, -30]}>
+      <sphereGeometry args={[8, 32, 32]} />
+      <meshBasicMaterial
+        color="#00F5FF"
+        transparent
+        opacity={0.03}
       />
     </mesh>
   );
@@ -77,13 +87,15 @@ function WaveGrid() {
 
 export function ThreeBackground() {
   return (
-    <div className="fixed inset-0 -z-10">
-      <Canvas camera={{ position: [0, 0, 30], fov: 75 }}>
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} intensity={1} />
-        <ParticleField />
-        <WaveGrid />
-      </Canvas>
-    </div>
+    <Canvas 
+      camera={{ position: [0, 0, 30], fov: 60 }}
+      style={{ background: 'transparent' }}
+      gl={{ alpha: true, antialias: true }}
+    >
+      <ambientLight intensity={0.3} />
+      <ParticleField />
+      <FloatingGrid />
+      <GlowOrb />
+    </Canvas>
   );
 }
