@@ -43,11 +43,10 @@ function ParticleField() {
 }
 
 function LightningBolt() {
-  const lineRef = useRef<THREE.Line>(null);
+  const groupRef = useRef<THREE.Group>(null);
   
-  const { points, colors } = useMemo(() => {
+  const points = useMemo(() => {
     const pts: THREE.Vector3[] = [];
-    const cols: number[] = [];
     
     // Create lightning path with more variation
     let currentX = -40;
@@ -57,36 +56,33 @@ function LightningBolt() {
     for (let i = 0; i < 35; i++) {
       pts.push(new THREE.Vector3(currentX, currentY, currentZ));
       
-      // White to cyan gradient with higher opacity
-      const t = i / 35;
-      cols.push(1, 1 - t * 0.3, 1, 0.5 + t * 0.3); // RGBA - brighter
-      
       currentX += Math.random() * 3 + 1.5;
       currentY += (Math.random() - 0.5) * 5;
       currentZ += (Math.random() - 0.5) * 4;
     }
     
-    return { points: pts, colors: new Float32Array(cols) };
+    return pts;
   }, []);
 
   useFrame((state) => {
-    if (lineRef.current) {
+    if (groupRef.current) {
       const time = state.clock.elapsedTime;
-      lineRef.current.position.x = Math.sin(time * 0.4) * 12;
-      lineRef.current.position.z = Math.cos(time * 0.3) * 18;
-      lineRef.current.rotation.z = Math.sin(time * 0.2) * 0.2;
+      groupRef.current.position.x = Math.sin(time * 0.4) * 12;
+      groupRef.current.position.z = Math.cos(time * 0.3) * 18;
+      groupRef.current.rotation.z = Math.sin(time * 0.2) * 0.2;
     }
   });
 
   return (
-    <Line
-      ref={lineRef}
-      points={points}
-      color="white"
-      lineWidth={2}
-      transparent
-      opacity={0.6}
-    />
+    <group ref={groupRef}>
+      <Line
+        points={points}
+        color="white"
+        lineWidth={2}
+        transparent
+        opacity={0.6}
+      />
+    </group>
   );
 }
 
