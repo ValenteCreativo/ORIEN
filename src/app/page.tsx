@@ -24,6 +24,7 @@ export default function HomePage() {
             </div>
             <div className="hidden md:flex items-center gap-8 text-sm">
               <Link href="/marketplace" className="text-[#A2AAAD] hover:text-[#00F5FF] transition-colors">Marketplace</Link>
+              <Link href="/network" className="text-[#A2AAAD] hover:text-[#00F5FF] transition-colors">Network</Link>
               <Link href="/sessions" className="text-[#A2AAAD] hover:text-[#00F5FF] transition-colors">Sessions</Link>
               <Link href="/earnings" className="text-[#A2AAAD] hover:text-[#00F5FF] transition-colors">Earnings</Link>
             </div>

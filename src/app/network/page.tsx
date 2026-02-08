@@ -5,60 +5,78 @@ import Link from 'next/link';
 import Image from 'next/image';
 import * as THREE from 'three';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Line, Points, PointMaterial, OrbitControls, Float } from '@react-three/drei';
+import { Line, Points, PointMaterial, OrbitControls, Text } from '@react-three/drei';
 import { DEMO_PROVIDERS, DEMO_SESSIONS, CATEGORY_INFO } from '@/lib/demo-data';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 
-type ProviderStatus = 'online' | 'busy' | 'offline';
-
+// Types
 type NetworkProvider = {
   id: string;
   name: string;
-  status: ProviderStatus;
-  pricePerMinute: number;
+  status: 'online' | 'busy' | 'offline';
   category?: string;
+  hardware?: string;
 };
 
 type NetworkSession = {
   id: string;
   providerId: string;
+  agentId: string;
   status: 'active' | 'completed';
-  effectiveTimeMs: number;
-  consumed: number;
+  toolName: string;
+  mission: string;
 };
 
-function statusColor(status: ProviderStatus) {
-  if (status === 'online') return '#00F5FF';
-  if (status === 'busy') return '#FFB800';
-  return '#334155';
+// Demo missions for visual impact
+const DEMO_MISSIONS = [
+  { tool: 'Blender 4.2', mission: 'Rendering 4K product shots' },
+  { tool: 'PyTorch A100', mission: 'Fine-tuning LLaMA-7B' },
+  { tool: 'FFmpeg GPU', mission: 'Transcoding 8K footage' },
+  { tool: 'Adobe CC', mission: 'Batch processing 500 images' },
+  { tool: 'CUDA Compute', mission: 'Training diffusion model' },
+  { tool: 'Logic Pro X', mission: 'Mastering album tracks' },
+  { tool: 'Docker Build', mission: 'Multi-arch container build' },
+  { tool: 'Houdini FX', mission: 'Fluid simulation render' },
+];
+
+// Minimalist grid floor
+function GridFloor({ animate }: { animate: boolean }) {
+  const ref = useRef<THREE.GridHelper>(null);
+  
+  useFrame((state) => {
+    if (ref.current && animate) {
+      ref.current.position.z = (state.clock.elapsedTime * 0.5) % 2;
+    }
+  });
+
+  return (
+    <gridHelper
+      ref={ref}
+      args={[60, 60, '#0A2540', '#0A2540']}
+      position={[0, -8, 0]}
+      rotation={[0, 0, 0]}
+    />
+  );
 }
 
-function randomBetween(min: number, max: number) {
-  return min + Math.random() * (max - min);
-}
-
-// Cosmic particle field
-function CosmicField() {
-  const count = 2500;
+// Floating particles - more sparse and elegant
+function AmbientParticles({ animate }: { animate: boolean }) {
   const ref = useRef<THREE.Points>(null);
+  const count = animate ? 800 : 400;
 
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      const r = randomBetween(8, 25);
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      arr[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      arr[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) * 0.6;
-      arr[i * 3 + 2] = r * Math.cos(phi);
+      arr[i * 3] = (Math.random() - 0.5) * 50;
+      arr[i * 3 + 1] = (Math.random() - 0.5) * 30;
+      arr[i * 3 + 2] = (Math.random() - 0.5) * 50;
     }
     return arr;
-  }, []);
+  }, [count]);
 
   useFrame((state) => {
-    if (ref.current) {
-      ref.current.rotation.y = state.clock.elapsedTime * 0.02;
-      ref.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.01) * 0.1;
+    if (ref.current && animate) {
+      ref.current.rotation.y = state.clock.elapsedTime * 0.01;
     }
   });
 
@@ -67,142 +85,167 @@ function CosmicField() {
       <PointMaterial
         transparent
         color="#00F5FF"
-        size={0.04}
+        size={0.03}
         sizeAttenuation
         depthWrite={false}
-        opacity={0.4}
+        opacity={animate ? 0.5 : 0.2}
         blending={THREE.AdditiveBlending}
       />
     </Points>
   );
 }
 
-// Central hub (Agent Core)
-function AgentCore() {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const glowRef = useRef<THREE.Mesh>(null);
+// Central Agent Hub - minimalist geometric
+function AgentHub({ animate }: { animate: boolean }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const innerRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.3;
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.5;
+    if (groupRef.current && animate) {
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
     }
-    if (glowRef.current) {
-      const scale = 1.8 + Math.sin(state.clock.elapsedTime * 2) * 0.2;
-      glowRef.current.scale.setScalar(scale);
+    if (innerRef.current) {
+      const scale = animate ? 1 + Math.sin(state.clock.elapsedTime * 2) * 0.1 : 1;
+      innerRef.current.scale.setScalar(scale);
     }
   });
 
   return (
-    <group>
-      {/* Outer glow */}
-      <mesh ref={glowRef}>
-        <sphereGeometry args={[1.5, 32, 32]} />
-        <meshBasicMaterial color="#00F5FF" transparent opacity={0.1} />
+    <group ref={groupRef}>
+      {/* Outer ring */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.5, 0.02, 16, 100]} />
+        <meshBasicMaterial color="#00F5FF" transparent opacity={0.6} />
       </mesh>
-      {/* Core */}
-      <mesh ref={meshRef}>
-        <icosahedronGeometry args={[1, 1]} />
+      {/* Inner core */}
+      <mesh ref={innerRef}>
+        <octahedronGeometry args={[0.8, 0]} />
         <meshStandardMaterial
           color="#ffffff"
           emissive="#00F5FF"
-          emissiveIntensity={0.5}
-          metalness={0.8}
-          roughness={0.2}
+          emissiveIntensity={animate ? 0.5 : 0.2}
+          wireframe
         />
       </mesh>
-      {/* Inner core */}
+      {/* Center point */}
       <mesh>
-        <sphereGeometry args={[0.5, 16, 16]} />
+        <sphereGeometry args={[0.15, 16, 16]} />
         <meshBasicMaterial color="#00F5FF" />
       </mesh>
     </group>
   );
 }
 
-// Provider node with pulsing effect
-function ProviderNode({ position, color, size = 0.5, active }: { position: THREE.Vector3; color: string; size?: number; active?: boolean }) {
+// Provider Node - clean geometric
+function ProviderNode({ 
+  position, 
+  status, 
+  active,
+  animate 
+}: { 
+  position: THREE.Vector3; 
+  status: string;
+  active: boolean;
+  animate: boolean;
+}) {
   const ref = useRef<THREE.Mesh>(null);
   const ringRef = useRef<THREE.Mesh>(null);
+  
+  const color = status === 'online' ? '#00F5FF' : status === 'busy' ? '#FFB800' : '#334155';
 
   useFrame((state) => {
     if (!ref.current) return;
-    const t = state.clock.elapsedTime;
-    ref.current.scale.setScalar(size * (1 + Math.sin(t * 2 + position.x) * 0.1));
-    
-    if (ringRef.current && active) {
-      ringRef.current.rotation.z = t * 2;
-      const ringScale = 1 + Math.sin(t * 3) * 0.3;
-      ringRef.current.scale.setScalar(ringScale);
+    if (animate && active) {
+      ref.current.rotation.y = state.clock.elapsedTime;
+      ref.current.rotation.x = state.clock.elapsedTime * 0.5;
+    }
+    if (ringRef.current && active && animate) {
+      ringRef.current.rotation.z = state.clock.elapsedTime * 2;
+      const scale = 1 + Math.sin(state.clock.elapsedTime * 3) * 0.2;
+      ringRef.current.scale.setScalar(scale);
     }
   });
 
   return (
     <group position={position}>
-      {active && (
-        <mesh ref={ringRef}>
-          <ringGeometry args={[0.8, 1.0, 32]} />
-          <meshBasicMaterial color="#00F5FF" transparent opacity={0.6} side={THREE.DoubleSide} />
+      {/* Activity ring */}
+      {active && animate && (
+        <mesh ref={ringRef} rotation={[Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.6, 0.65, 32]} />
+          <meshBasicMaterial color="#00F5FF" transparent opacity={0.8} side={THREE.DoubleSide} />
         </mesh>
       )}
+      {/* Node */}
       <mesh ref={ref}>
-        <sphereGeometry args={[size, 16, 16]} />
+        <boxGeometry args={[0.4, 0.4, 0.4]} />
         <meshStandardMaterial
           color={color}
           emissive={color}
-          emissiveIntensity={active ? 0.8 : 0.4}
-          metalness={0.5}
-          roughness={0.3}
+          emissiveIntensity={active ? 0.6 : 0.2}
         />
       </mesh>
     </group>
   );
 }
 
-// Data pulse traveling along connection
-function DataPulse({ from, to, speed = 0.5, delay = 0 }: { from: THREE.Vector3; to: THREE.Vector3; speed?: number; delay?: number }) {
+// Data stream - flowing particles along connection
+function DataStream({ from, to, animate }: { from: THREE.Vector3; to: THREE.Vector3; animate: boolean }) {
   const ref = useRef<THREE.Mesh>(null);
+  const ref2 = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
-    if (!ref.current) return;
-    const t = ((state.clock.elapsedTime - delay) * speed) % 1;
-    if (t < 0) return;
-    ref.current.position.lerpVectors(from, to, t);
-    ref.current.scale.setScalar(0.15 * (1 - Math.abs(t - 0.5) * 0.5));
+    if (!animate) return;
+    
+    if (ref.current) {
+      const t = (state.clock.elapsedTime * 0.8) % 1;
+      ref.current.position.lerpVectors(from, to, t);
+    }
+    if (ref2.current) {
+      const t = ((state.clock.elapsedTime * 0.8) + 0.5) % 1;
+      ref2.current.position.lerpVectors(from, to, t);
+    }
   });
 
+  if (!animate) return null;
+
   return (
-    <mesh ref={ref}>
-      <sphereGeometry args={[0.15, 8, 8]} />
-      <meshBasicMaterial color="#00F5FF" transparent opacity={0.9} />
-    </mesh>
+    <>
+      <mesh ref={ref}>
+        <sphereGeometry args={[0.08, 8, 8]} />
+        <meshBasicMaterial color="#00F5FF" transparent opacity={0.9} />
+      </mesh>
+      <mesh ref={ref2}>
+        <sphereGeometry args={[0.05, 8, 8]} />
+        <meshBasicMaterial color="#00F5FF" transparent opacity={0.6} />
+      </mesh>
+    </>
   );
 }
 
-// Connection line with optional data flow
-function Connection({ from, to, active }: { from: THREE.Vector3; to: THREE.Vector3; active: boolean }) {
+// Connection line
+function Connection({ from, to, active, animate }: { from: THREE.Vector3; to: THREE.Vector3; active: boolean; animate: boolean }) {
   const points = useMemo(() => [from, to], [from, to]);
 
   return (
     <group>
       <Line
         points={points}
-        color={active ? '#00F5FF' : '#1E3A5F'}
-        lineWidth={active ? 2 : 1}
+        color={active && animate ? '#00F5FF' : '#1E3A5F'}
+        lineWidth={active ? 1.5 : 0.5}
         transparent
-        opacity={active ? 0.7 : 0.2}
+        opacity={active ? 0.6 : 0.15}
       />
-      {active && (
-        <>
-          <DataPulse from={from} to={to} speed={0.6} delay={0} />
-          <DataPulse from={to} to={from} speed={0.4} delay={0.5} />
-        </>
-      )}
+      {active && <DataStream from={from} to={to} animate={animate} />}
     </group>
   );
 }
 
-function NetworkScene({ providers, sessions }: { providers: NetworkProvider[]; sessions: NetworkSession[] }) {
+// Main 3D Scene
+function NetworkScene({ providers, sessions, animate }: { 
+  providers: NetworkProvider[]; 
+  sessions: NetworkSession[];
+  animate: boolean;
+}) {
   const center = useMemo(() => new THREE.Vector3(0, 0, 0), []);
 
   const providerPositions = useMemo(() => {
@@ -210,8 +253,8 @@ function NetworkScene({ providers, sessions }: { providers: NetworkProvider[]; s
     const n = providers.length;
     providers.forEach((p, i) => {
       const a = (i / Math.max(1, n)) * Math.PI * 2;
-      const r = 10 + Math.sin(i * 0.5) * 2;
-      const y = Math.sin(a * 2) * 3;
+      const r = 8;
+      const y = Math.sin(a * 2) * 1.5;
       map.set(p.id, new THREE.Vector3(Math.cos(a) * r, y, Math.sin(a) * r));
     });
     return map;
@@ -224,26 +267,22 @@ function NetworkScene({ providers, sessions }: { providers: NetworkProvider[]; s
   }, [sessions]);
 
   return (
-    <Canvas camera={{ position: [0, 8, 22], fov: 55 }} gl={{ alpha: true, antialias: true }}>
+    <Canvas camera={{ position: [0, 5, 18], fov: 50 }} gl={{ alpha: true, antialias: true }}>
       <color attach="background" args={['#0A1128']} />
-      <fog attach="fog" args={['#0A1128', 20, 50]} />
       
-      <ambientLight intensity={0.3} />
-      <pointLight position={[15, 15, 15]} intensity={1} color="#00F5FF" />
-      <pointLight position={[-15, -10, -15]} intensity={0.5} color="#ffffff" />
-      <spotLight position={[0, 20, 0]} intensity={0.8} angle={0.5} penumbra={1} color="#00F5FF" />
+      <ambientLight intensity={0.2} />
+      <pointLight position={[10, 10, 10]} intensity={0.8} color="#00F5FF" />
+      <pointLight position={[-10, -5, -10]} intensity={0.3} color="#ffffff" />
 
-      <CosmicField />
-      
-      <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
-        <AgentCore />
-      </Float>
+      <AmbientParticles animate={animate} />
+      <GridFloor animate={animate} />
+      <AgentHub animate={animate} />
 
       {/* Connections */}
       {providers.map((p) => {
         const pos = providerPositions.get(p.id) ?? new THREE.Vector3(0, 0, 0);
         const active = activeProviderIds.has(p.id);
-        return <Connection key={`c-${p.id}`} from={center} to={pos} active={active} />;
+        return <Connection key={`c-${p.id}`} from={center} to={pos} active={active} animate={animate} />;
       })}
 
       {/* Provider nodes */}
@@ -254,9 +293,9 @@ function NetworkScene({ providers, sessions }: { providers: NetworkProvider[]; s
           <ProviderNode
             key={`n-${p.id}`}
             position={pos}
-            color={statusColor(p.status)}
-            size={active ? 0.6 : 0.45}
+            status={p.status}
             active={active}
+            animate={animate}
           />
         );
       })}
@@ -264,73 +303,86 @@ function NetworkScene({ providers, sessions }: { providers: NetworkProvider[]; s
       <OrbitControls
         enablePan={false}
         enableZoom={true}
-        maxDistance={35}
-        minDistance={12}
-        autoRotate
-        autoRotateSpeed={0.5}
+        maxDistance={30}
+        minDistance={10}
+        autoRotate={animate}
+        autoRotateSpeed={0.3}
+        enableDamping
       />
     </Canvas>
   );
 }
 
 export default function NetworkPage() {
-  const providers = (DEMO_PROVIDERS as any[]).map((p) => ({
+  const [demoActive, setDemoActive] = useState(true);
+
+  const providers: NetworkProvider[] = (DEMO_PROVIDERS as any[]).map((p) => ({
     id: p.id,
     name: p.name,
-    status: p.status as ProviderStatus,
-    pricePerMinute: p.pricePerMinute,
+    status: p.status,
     category: p.category,
+    hardware: p.hardware,
   }));
 
-  const baseSessions = (DEMO_SESSIONS as any[]).map((s) => ({
-    id: s.id,
-    providerId: s.providerId,
-    status: s.status as 'active' | 'completed',
-    effectiveTimeMs: s.effectiveTimeMs,
-    consumed: s.consumed,
-  }));
+  const [sessions, setSessions] = useState<NetworkSession[]>(() => {
+    return (DEMO_SESSIONS as any[]).map((s, i) => ({
+      id: s.id,
+      providerId: s.providerId,
+      agentId: s.agentId || `agent_${i}`,
+      status: s.status,
+      toolName: DEMO_MISSIONS[i % DEMO_MISSIONS.length].tool,
+      mission: DEMO_MISSIONS[i % DEMO_MISSIONS.length].mission,
+    }));
+  });
 
-  const [sessions, setSessions] = useState<NetworkSession[]>(baseSessions);
-
-  // Simulate network activity
+  // Simulate network activity when demo is active
   useEffect(() => {
+    if (!demoActive) return;
+
     const interval = setInterval(() => {
       setSessions((prev) => {
-        const next = prev.map((x) => ({ ...x }));
+        const next = [...prev];
         
-        // Random toggle
+        // Randomly complete one
         const activeIdxs = next.map((x, i) => (x.status === 'active' ? i : -1)).filter(i => i >= 0);
-        if (activeIdxs.length > 0 && Math.random() > 0.5) {
+        if (activeIdxs.length > 1 && Math.random() > 0.4) {
           const idx = activeIdxs[Math.floor(Math.random() * activeIdxs.length)];
-          next[idx].status = 'completed';
+          next[idx] = { ...next[idx], status: 'completed' };
         }
 
-        const providerIds = providers.map(p => p.id);
+        // Start a new one
+        const providerIds = providers.filter(p => p.status !== 'offline').map(p => p.id);
         const randomProvider = providerIds[Math.floor(Math.random() * providerIds.length)];
+        const missionIdx = Math.floor(Math.random() * DEMO_MISSIONS.length);
 
-        const existing = next.find((s) => s.providerId === randomProvider);
-        if (existing) {
-          existing.status = 'active';
+        const existing = next.findIndex((s) => s.providerId === randomProvider);
+        if (existing >= 0) {
+          next[existing] = {
+            ...next[existing],
+            status: 'active',
+            toolName: DEMO_MISSIONS[missionIdx].tool,
+            mission: DEMO_MISSIONS[missionIdx].mission,
+          };
         } else {
           next.push({
-            id: `ses-${Date.now()}`,
+            id: `ses_${Date.now()}`,
             providerId: randomProvider,
+            agentId: `agent_${Math.random().toString(36).slice(2, 6)}`,
             status: 'active',
-            effectiveTimeMs: 0,
-            consumed: 0,
+            toolName: DEMO_MISSIONS[missionIdx].tool,
+            mission: DEMO_MISSIONS[missionIdx].mission,
           });
         }
 
-        return next.slice(-10);
+        return next.slice(-12);
       });
-    }, 2500);
+    }, 2000);
 
     return () => clearInterval(interval);
-  }, [providers]);
+  }, [demoActive, providers]);
 
-  const activeCount = sessions.filter((s) => s.status === 'active').length;
+  const activeSessions = sessions.filter(s => s.status === 'active');
   const online = providers.filter(p => p.status === 'online').length;
-  const busy = providers.filter(p => p.status === 'busy').length;
 
   return (
     <div className="min-h-screen bg-[#0A1128]">
@@ -360,131 +412,150 @@ export default function NetworkPage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <div className="relative pt-20">
-        {/* 3D Scene - Full Width */}
-        <div className="h-[70vh] relative">
-          <NetworkScene providers={providers} sessions={sessions} />
+      <div className="pt-20 flex flex-col lg:flex-row min-h-screen">
+        {/* 3D Visualization */}
+        <div className="flex-1 relative">
+          <div className="h-[60vh] lg:h-full">
+            <NetworkScene providers={providers} sessions={sessions} animate={demoActive} />
+          </div>
           
-          {/* Overlay Content */}
-          <div className="absolute inset-0 pointer-events-none flex items-end justify-center pb-8">
-            <div className="text-center">
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-                The <span className="text-[#00F5FF]">Network</span>
-              </h1>
-              <p className="text-[#A2AAAD]">Live compute topology • Drag to explore</p>
+          {/* Overlay Title */}
+          <div className="absolute top-6 left-6">
+            <h1 className="text-2xl font-bold text-white mb-1">Network Topology</h1>
+            <p className="text-sm text-[#A2AAAD]">
+              {demoActive ? 'Live simulation • Drag to explore' : 'Static view • Enable demo to animate'}
+            </p>
+          </div>
+
+          {/* Demo Toggle */}
+          <div className="absolute top-6 right-6">
+            <button
+              onClick={() => setDemoActive(!demoActive)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                demoActive
+                  ? 'bg-[#00F5FF] text-[#0A1128] shadow-[0_0_20px_rgba(0,245,255,0.5)]'
+                  : 'bg-[#0A1128]/80 border border-[#A2AAAD]/30 text-[#A2AAAD]'
+              }`}
+            >
+              {demoActive ? '● Live' : '○ Static'}
+            </button>
+          </div>
+
+          {/* Stats Overlay */}
+          <div className="absolute bottom-6 left-6 right-6">
+            <div className="flex gap-6 text-center">
+              <div>
+                <div className="text-2xl font-bold text-[#00F5FF]">{providers.length}</div>
+                <div className="text-[10px] text-[#A2AAAD] uppercase tracking-wider">Providers</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-green-400">{online}</div>
+                <div className="text-[10px] text-[#A2AAAD] uppercase tracking-wider">Online</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-[#00F5FF]">{activeSessions.length}</div>
+                <div className="text-[10px] text-[#A2AAAD] uppercase tracking-wider">Active</div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Stats Bar */}
-        <div className="bg-[#0A1128]/90 backdrop-blur-md border-y border-[#00F5FF]/10">
-          <div className="max-w-7xl mx-auto px-6 py-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-[#00F5FF]">{providers.length}</div>
-                <div className="text-xs text-[#A2AAAD] uppercase tracking-wider mt-1">Providers</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-400">{online}</div>
-                <div className="text-xs text-[#A2AAAD] uppercase tracking-wider mt-1">Online</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-400">{busy}</div>
-                <div className="text-xs text-[#A2AAAD] uppercase tracking-wider mt-1">Busy</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-[#00F5FF]">{activeCount}</div>
-                <div className="text-xs text-[#A2AAAD] uppercase tracking-wider mt-1">Active Sessions</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Live Feed */}
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Activity Feed */}
-            <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 overflow-hidden">
-              <div className="px-6 py-4 border-b border-[#A2AAAD]/10 flex items-center justify-between">
-                <h2 className="font-semibold text-white">Live Activity</h2>
+        {/* Mission Control Panel */}
+        <div className="lg:w-[420px] bg-[#0A1128]/90 backdrop-blur-md border-l border-[#00F5FF]/10 overflow-y-auto">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-white">Mission Control</h2>
+              {demoActive && (
                 <span className="flex items-center gap-2 text-xs text-green-400">
-                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  Streaming
+                  <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                  Live
                 </span>
-              </div>
-              <div className="p-4 space-y-2 max-h-[300px] overflow-y-auto">
-                {sessions.slice().reverse().map((s) => {
-                  const p = providers.find((x) => x.id === s.providerId);
+              )}
+            </div>
+
+            {/* Active Missions */}
+            <div className="space-y-3 mb-8">
+              <div className="text-xs text-[#A2AAAD] uppercase tracking-wider mb-3">Active Missions</div>
+              {activeSessions.length === 0 ? (
+                <div className="text-center py-8 text-[#A2AAAD]/60">
+                  {demoActive ? 'Waiting for activity...' : 'Enable demo to see activity'}
+                </div>
+              ) : (
+                activeSessions.map((s) => {
+                  const p = providers.find(x => x.id === s.providerId);
                   const catInfo = p?.category ? CATEGORY_INFO[p.category as keyof typeof CATEGORY_INFO] : null;
+                  
                   return (
-                    <div key={s.id} className="flex items-center justify-between p-3 bg-[#0A1128]/40 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        {catInfo && <span>{catInfo.icon}</span>}
-                        <div>
-                          <div className="text-sm text-white">{p?.name ?? s.providerId}</div>
-                          <div className="text-xs text-[#A2AAAD]/60 font-mono">{s.id.slice(0, 12)}...</div>
+                    <div key={s.id} className="p-4 bg-[#00F5FF]/5 border border-[#00F5FF]/20 rounded-xl">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          {catInfo && <span className="text-lg">{catInfo.icon}</span>}
+                          <div>
+                            <div className="text-sm font-medium text-white">{s.toolName}</div>
+                            <div className="text-xs text-[#A2AAAD]">{p?.name}</div>
+                          </div>
                         </div>
+                        <span className="px-2 py-0.5 bg-[#00F5FF]/20 text-[#00F5FF] text-[10px] rounded-full">
+                          RUNNING
+                        </span>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        s.status === 'active' 
-                          ? 'bg-[#00F5FF]/20 text-[#00F5FF]' 
-                          : 'bg-[#A2AAAD]/20 text-[#A2AAAD]'
-                      }`}>
-                        {s.status}
-                      </span>
+                      <div className="text-xs text-[#A2AAAD]/80 mb-2">{s.mission}</div>
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-[#A2AAAD]/60 font-mono">{s.agentId}</span>
+                        <span className="text-[#A2AAAD]/60 font-mono">{s.id.slice(0, 12)}</span>
+                      </div>
                     </div>
                   );
-                })}
+                })
+              )}
+            </div>
+
+            {/* Recent Completed */}
+            <div className="space-y-2">
+              <div className="text-xs text-[#A2AAAD] uppercase tracking-wider mb-3">Recently Completed</div>
+              {sessions.filter(s => s.status === 'completed').slice(-5).reverse().map((s) => {
+                const p = providers.find(x => x.id === s.providerId);
+                return (
+                  <div key={s.id} className="flex items-center justify-between p-3 bg-[#0A1128]/60 border border-[#A2AAAD]/10 rounded-lg">
+                    <div>
+                      <div className="text-sm text-[#A2AAAD]">{s.toolName}</div>
+                      <div className="text-xs text-[#A2AAAD]/60">{p?.name}</div>
+                    </div>
+                    <span className="text-xs text-green-400">✓</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Legend */}
+            <div className="mt-8 pt-6 border-t border-[#A2AAAD]/10">
+              <div className="text-xs text-[#A2AAAD] uppercase tracking-wider mb-4">Legend</div>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-[#00F5FF] rounded-sm" />
+                  <span className="text-[#A2AAAD]">Online</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-[#FFB800] rounded-sm" />
+                  <span className="text-[#A2AAAD]">Busy</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 border border-[#A2AAAD]/30 rounded-sm" />
+                  <span className="text-[#A2AAAD]">Offline</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-white rounded-full" />
+                  <span className="text-[#A2AAAD]">Agent Hub</span>
+                </div>
               </div>
             </div>
 
-            {/* Legend & Info */}
-            <div className="space-y-6">
-              <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 p-6">
-                <h2 className="font-semibold text-white mb-4">Understanding the Network</h2>
-                <div className="space-y-4 text-sm">
-                  <div className="flex items-start gap-3">
-                    <div className="w-4 h-4 rounded-full bg-white mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="text-white font-medium">Agent Core</div>
-                      <div className="text-[#A2AAAD]">Central hub where agents request compute resources</div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-4 h-4 rounded-full bg-[#00F5FF] mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="text-white font-medium">Online Providers</div>
-                      <div className="text-[#A2AAAD]">Hardware ready to accept execution requests</div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-4 h-4 rounded-full bg-yellow-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="text-white font-medium">Busy Providers</div>
-                      <div className="text-[#A2AAAD]">Currently processing tasks</div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 rounded-full bg-[#00F5FF] mt-1.5 flex-shrink-0 animate-pulse" />
-                    <div>
-                      <div className="text-white font-medium">Data Pulses</div>
-                      <div className="text-[#A2AAAD]">Real-time execution traffic between agents and providers</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
+            {/* CTA */}
+            <div className="mt-8">
               <Link href="/marketplace">
-                <div className="bg-gradient-to-r from-[#00F5FF]/10 to-purple-500/10 rounded-xl border border-[#00F5FF]/20 p-6 hover:border-[#00F5FF]/40 transition-all cursor-pointer">
-                  <h3 className="font-semibold text-white mb-2">Join the Network</h3>
-                  <p className="text-sm text-[#A2AAAD] mb-4">
-                    Browse available compute or register your hardware to start earning.
-                  </p>
-                  <span className="text-[#00F5FF] text-sm font-medium">
-                    Explore Marketplace →
-                  </span>
-                </div>
+                <button className="w-full py-3 text-sm font-medium bg-[#00F5FF] text-[#0A1128] rounded-full hover:shadow-[0_0_20px_rgba(0,245,255,0.4)] transition-all">
+                  Join the Network →
+                </button>
               </Link>
             </div>
           </div>
