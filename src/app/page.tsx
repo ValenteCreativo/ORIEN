@@ -448,11 +448,29 @@ export default function HomePage() {
         {/* Footer */}
         <footer className="py-8 px-6 border-t border-[#A2AAAD]/10">
           <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#A2AAAD]/60">
-            <span>© 2026 ORIEN — The Compute Rail for Agents</span>
+            <span>
+              © 2026 ORIEN — The Compute Rail for Agents
+              <span className="hidden sm:inline"> · </span>
+              <span className="block sm:inline text-[#A2AAAD]/50">From México with 💙</span>
+            </span>
             <div className="flex items-center gap-6">
               <Link href="/docs" className="hover:text-[#00F5FF] transition-colors">Docs</Link>
-              <Link href="/github" className="hover:text-[#00F5FF] transition-colors">GitHub</Link>
-              <Link href="https://warpcast.com/orien" className="hover:text-[#00F5FF] transition-colors">Warpcast</Link>
+              <a
+                href="https://github.com/ValenteCreativo/ORIEN"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[#00F5FF] transition-colors"
+              >
+                GitHub
+              </a>
+              <a
+                href="https://warpcast.com/orien"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[#00F5FF] transition-colors"
+              >
+                Warpcast
+              </a>
             </div>
           </div>
         </footer>
