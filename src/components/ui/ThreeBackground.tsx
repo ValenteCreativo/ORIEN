@@ -199,7 +199,6 @@ export function ThreeBackground() {
         
         <ParticleField />
         <WaveGrid />
-        <LightningBolt />
         <FloatingOrbs />
       </Canvas>
     </div>
