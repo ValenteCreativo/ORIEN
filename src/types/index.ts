@@ -73,7 +73,7 @@ export interface Execution {
   sessionId: string;
   toolId: string;
   args: Record<string, unknown>;
-  status: 'running' | 'completed' | 'failed';
+  status: 'pending' | 'running' | 'completed' | 'failed';
   startedAt: Date;
   endedAt?: Date;
   durationMs?: number;

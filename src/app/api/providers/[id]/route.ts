@@ -10,7 +10,7 @@ interface RouteParams {
 // GET /api/providers/[id] - Get provider details
 export async function GET(request: NextRequest, { params }: RouteParams) {
   const { id } = await params;
-  const provider = providerDb.get(id);
+  const provider = await providerDb.get(id);
 
   if (!provider) {
     const response: ApiResponse<never> = {
@@ -34,7 +34,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   
   try {
     const body = await request.json();
-    const updated = providerDb.update(id, body);
+    const updated = await providerDb.update(id, body);
 
     if (!updated) {
       const response: ApiResponse<never> = {
@@ -62,7 +62,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 // DELETE /api/providers/[id] - Remove provider
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const { id } = await params;
-  const deleted = providerDb.delete(id);
+  const deleted = await providerDb.delete(id);
 
   if (!deleted) {
     const response: ApiResponse<never> = {

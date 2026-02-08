@@ -1,20 +1,21 @@
 // ORIEN Demo Data Initialization
-// Call this endpoint to seed demo data for testing
-
 import { NextResponse } from 'next/server';
 import { seedDemoData, providerDb, agentDb } from '@/lib/db';
 
 // POST /api/init - Initialize demo data
 export async function POST() {
   try {
-    seedDemoData();
+    await seedDemoData();
+    
+    const providers = await providerDb.list();
+    const agents = await agentDb.list();
     
     return NextResponse.json({
       success: true,
       message: 'Demo data initialized',
       data: {
-        providers: providerDb.list().length,
-        agents: agentDb.list().length,
+        providers: providers.length,
+        agents: agents.length,
       },
     });
   } catch (error) {
@@ -27,12 +28,15 @@ export async function POST() {
 
 // GET /api/init - Check initialization status
 export async function GET() {
+  const providers = await providerDb.list();
+  const agents = await agentDb.list();
+  
   return NextResponse.json({
     success: true,
     data: {
-      providers: providerDb.list().length,
-      agents: agentDb.list().length,
-      initialized: providerDb.list().length > 0,
+      providers: providers.length,
+      agents: agents.length,
+      initialized: providers.length > 0,
     },
   });
 }

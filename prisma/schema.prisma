@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============ ACTORS ============
+
+model Agent {
+  id            String    @id @default(cuid())
+  name          String
+  walletAddress String    @unique
+  ensName       String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+}
+
+model Provider {
+  id             String             @id @default(cuid())
+  name           String
+  walletAddress  String             @unique
+  ensName        String?
+  status         ProviderStatus     @default(OFFLINE)
+  pricePerMinute Int
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  tools          Tool[]
+  sessions       Session[]
+  settlements    Settlement[]
+  reputation     ProviderReputation?
+}
+
+model ProviderReputation {
+  id                String   @id @default(cuid())
+  providerId        String   @unique
+  provider          Provider @relation(fields: [providerId], references: [id])
+  uptime            Float    @default(100)
+  completedSessions Int      @default(0)
+  disputes          Int      @default(0)
+  updatedAt         DateTime @updatedAt
+}
+
+enum ProviderStatus {
+  ONLINE
+  OFFLINE
+  BUSY
+}
+
+// ============ TOOLS ============
+
+model Tool {
+  id                String      @id @default(cuid())
+  providerId        String
+  provider          Provider    @relation(fields: [providerId], references: [id])
+  name              String
+  description       String
+  command           String
+  argsSchema        Json
+  maxDurationSeconds Int        @default(300)
+  createdAt         DateTime    @default(now())
+  executions        Execution[]
+
+  @@unique([providerId, name])
+}
+
+// ============ SESSIONS ============
+
+model Session {
+  id              String        @id @default(cuid())
+  agentId         String
+  agent           Agent         @relation(fields: [agentId], references: [id])
+  providerId      String
+  provider        Provider      @relation(fields: [providerId], references: [id])
+  status          SessionStatus @default(PENDING)
+  budgetAllowance Int
+  consumed        Int           @default(0)
+  effectiveTimeMs Int           @default(0)
+  yellowSessionId String?
+  createdAt       DateTime      @default(now())
+  startedAt       DateTime?
+  endedAt         DateTime?
+  settledAt       DateTime?
+  executions      Execution[]
+  settlement      Settlement?
+}
+
+enum SessionStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  FAILED
+  SETTLED
+}
+
+// ============ EXECUTIONS ============
+
+model Execution {
+  id          String          @id @default(cuid())
+  sessionId   String
+  session     Session         @relation(fields: [sessionId], references: [id])
+  toolId      String
+  tool        Tool            @relation(fields: [toolId], references: [id])
+  args        Json
+  status      ExecutionStatus @default(PENDING)
+  durationMs  Int?
+  cost        Int?
+  result      Json?
+  error       String?
+  startedAt   DateTime        @default(now())
+  endedAt     DateTime?
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+// ============ PAYMENTS ============
+
+model Settlement {
+  id             String   @id @default(cuid())
+  sessionId      String   @unique
+  session        Session  @relation(fields: [sessionId], references: [id])
+  providerId     String
+  provider       Provider @relation(fields: [providerId], references: [id])
+  totalAmount    Int
+  providerPayout Int
+  platformFee    Int
+  reserveAmount  Int
+  txHash         String?
+  settledAt      DateTime @default(now())
+}
+
+model MicropaymentLog {
+  id              String   @id @default(cuid())
+  yellowSessionId String
+  executionId     String
+  amount          BigInt
+  sender          String
+  recipient       String
+  createdAt       DateTime @default(now())
+
+  @@index([yellowSessionId])
+}

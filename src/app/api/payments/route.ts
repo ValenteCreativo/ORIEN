@@ -1,13 +1,9 @@
 // ORIEN Payment & Settlement API
-// Handles session settlements and payouts
-
 import { NextRequest, NextResponse } from 'next/server';
-import { sessionDb, providerDb } from '@/lib/db';
-import { Settlement, ApiResponse, DEFAULT_PAYOUT_SPLIT } from '@/types';
+import { sessionDb } from '@/lib/db';
+import { prisma } from '@/lib/db/prisma';
+import { ApiResponse, DEFAULT_PAYOUT_SPLIT } from '@/types';
 import { randomUUID } from 'crypto';
-
-// In-memory settlements store (would be DB in production)
-const settlements: Map<string, Settlement> = new Map();
 
 interface SettlementRequest {
   sessionId: string;
@@ -18,29 +14,34 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const sessionId = searchParams.get('sessionId');
 
-  let results: Settlement[];
-
-  if (sessionId) {
-    const settlement = Array.from(settlements.values()).find(s => s.sessionId === sessionId);
-    results = settlement ? [settlement] : [];
-  } else {
-    results = Array.from(settlements.values());
-  }
+  const settlements = await prisma.settlement.findMany({
+    where: sessionId ? { sessionId } : undefined,
+    orderBy: { settledAt: 'desc' },
+  });
 
   return NextResponse.json({
     success: true,
-    data: results,
+    data: settlements.map(s => ({
+      id: s.id,
+      sessionId: s.sessionId,
+      totalAmount: s.totalAmount,
+      providerPayout: s.providerPayout,
+      platformFee: s.platformFee,
+      reserveAmount: s.reserveAmount,
+      txHash: s.txHash,
+      settledAt: s.settledAt,
+    })),
   });
 }
 
-// POST /api/payments/settle - Settle a completed session
+// POST /api/payments - Settle a completed session
 export async function POST(request: NextRequest) {
   try {
     const body: SettlementRequest = await request.json();
     const { sessionId } = body;
 
     // Validate session
-    const session = sessionDb.get(sessionId);
+    const session = await sessionDb.get(sessionId);
     if (!session) {
       return NextResponse.json({
         success: false,
@@ -63,7 +64,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if already settled
-    const existingSettlement = Array.from(settlements.values()).find(s => s.sessionId === sessionId);
+    const existingSettlement = await prisma.settlement.findUnique({
+      where: { sessionId },
+    });
     if (existingSettlement) {
       return NextResponse.json({
         success: false,
@@ -78,29 +81,26 @@ export async function POST(request: NextRequest) {
     const reserveAmount = totalAmount - providerPayout - platformFee;
 
     // Create settlement record
-    const settlement: Settlement = {
-      id: `settlement-${randomUUID()}`,
-      sessionId,
-      totalAmount,
-      providerPayout,
-      platformFee,
-      reserveAmount,
-      settledAt: new Date(),
-      // txHash would be set after actual on-chain settlement
-    };
-
-    settlements.set(settlement.id, settlement);
+    const settlement = await prisma.settlement.create({
+      data: {
+        id: `settlement-${randomUUID()}`,
+        sessionId,
+        providerId: session.providerId,
+        totalAmount,
+        providerPayout,
+        platformFee,
+        reserveAmount,
+        // txHash would be set after actual on-chain settlement
+      },
+    });
 
     // Update session status
-    sessionDb.update(sessionId, { 
+    await sessionDb.update(sessionId, { 
       status: 'settled',
       settledAt: new Date(),
     });
 
-    // In production: trigger actual USDC transfer via Arc/Circle
-    // For MVP: just return the settlement record
-
-    const response: ApiResponse<Settlement> = {
+    const response: ApiResponse<typeof settlement> = {
       success: true,
       data: settlement,
     };

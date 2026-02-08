@@ -11,7 +11,7 @@ interface RouteParams {
 // GET /api/sessions/[id] - Get session details
 export async function GET(request: NextRequest, { params }: RouteParams) {
   const { id } = await params;
-  const session = sessionDb.get(id);
+  const session = await sessionDb.get(id);
 
   if (!session) {
     return NextResponse.json({
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 
   // Include executions
-  const executions = executionDb.listBySession(id);
+  const executions = await executionDb.listBySession(id);
   const sessionWithExecutions = { ...session, executions };
 
   const response: ApiResponse<Session> = {
@@ -38,7 +38,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   
   try {
     const body = await request.json();
-    const session = sessionDb.get(id);
+    const session = await sessionDb.get(id);
 
     if (!session) {
       return NextResponse.json({
@@ -55,7 +55,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           error: 'Session cannot be started',
         }, { status: 400 });
       }
-      const updated = sessionDb.update(id, { status: 'active' });
+      const updated = await sessionDb.update(id, { status: 'active' });
       return NextResponse.json({ success: true, data: updated });
     }
 
@@ -69,7 +69,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
       // Close Yellow session and get final totals
       const yellowSessionId = `yellow-${id}`;
-      const yellowResult = closeYellowSession(yellowSessionId);
+      closeYellowSession(yellowSessionId);
       
       // Calculate payout split
       const totalConsumed = session.consumed;
@@ -78,13 +78,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       const reserveAmount = totalConsumed - providerPayout - platformFee;
 
       // Get provider for settlement
-      const provider = providerDb.get(session.providerId);
+      const provider = await providerDb.get(session.providerId);
 
       // Execute settlement via Circle/Arc
       const settlement = await executeSettlement({
         sessionId: id,
         providerAddress: provider?.walletAddress || '',
-        agentAddress: '', // Would come from session
+        agentAddress: '',
         totalAmount: centsToUSDC(totalConsumed),
         providerPayout: centsToUSDC(providerPayout),
         platformFee: centsToUSDC(platformFee),
@@ -99,13 +99,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         txHash: settlement.txHash,
       });
 
-      const updated = sessionDb.update(id, { 
+      const updated = await sessionDb.update(id, { 
         status: 'completed',
         endedAt: new Date(),
       });
 
       // Free up provider
-      providerDb.update(session.providerId, { status: 'online' });
+      await providerDb.update(session.providerId, { status: 'online' });
 
       return NextResponse.json({ 
         success: true, 
@@ -122,7 +122,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     // Generic update
-    const updated = sessionDb.update(id, body);
+    const updated = await sessionDb.update(id, body);
     return NextResponse.json({ success: true, data: updated });
 
   } catch (error) {

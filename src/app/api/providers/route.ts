@@ -10,8 +10,8 @@ export async function GET(request: NextRequest) {
   const availableOnly = searchParams.get('available') === 'true';
 
   const providers = availableOnly 
-    ? providerDb.listAvailable() 
-    : providerDb.list();
+    ? await providerDb.listAvailable() 
+    : await providerDb.list();
 
   const response: ApiResponse<Provider[]> = {
     success: true,
@@ -26,22 +26,21 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    const provider: Provider = {
+    const providerData = {
       id: `provider-${randomUUID()}`,
       name: body.name,
       walletAddress: body.walletAddress,
-      status: 'offline',
-      pricePerMinute: body.pricePerMinute || 100, // default $1/min
+      status: 'offline' as const,
+      pricePerMinute: body.pricePerMinute || 100,
       tools: body.tools || [],
       reputation: {
         uptime: 100,
         completedSessions: 0,
         disputes: 0,
       },
-      createdAt: new Date(),
     };
 
-    const created = providerDb.create(provider);
+    const created = await providerDb.create(providerData);
 
     const response: ApiResponse<Provider> = {
       success: true,

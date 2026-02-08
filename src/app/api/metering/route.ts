@@ -1,6 +1,4 @@
 // ORIEN Metering Engine API
-// Tracks and reports effective execution time
-
 import { NextRequest, NextResponse } from 'next/server';
 import { sessionDb, executionDb } from '@/lib/db';
 import { ApiResponse } from '@/types';
@@ -31,7 +29,7 @@ export async function GET(request: NextRequest) {
     }, { status: 400 });
   }
 
-  const session = sessionDb.get(sessionId);
+  const session = await sessionDb.get(sessionId);
   if (!session) {
     return NextResponse.json({
       success: false,
@@ -39,7 +37,7 @@ export async function GET(request: NextRequest) {
     }, { status: 404 });
   }
 
-  const executions = executionDb.listBySession(sessionId);
+  const executions = await executionDb.listBySession(sessionId);
 
   const report: MeteringReport = {
     sessionId,

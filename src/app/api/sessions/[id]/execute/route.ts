@@ -1,6 +1,4 @@
 // ORIEN Tool Execution API
-// This is where agents execute tools on provider infrastructure
-
 import { NextRequest, NextResponse } from 'next/server';
 import { sessionDb, providerDb, executionDb } from '@/lib/db';
 import { Execution, ApiResponse } from '@/types';
@@ -20,7 +18,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const { toolId, args } = body;
 
     // Validate session
-    const session = sessionDb.get(sessionId);
+    const session = await sessionDb.get(sessionId);
     if (!session) {
       return NextResponse.json({
         success: false,
@@ -40,11 +38,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({
         success: false,
         error: 'Budget exhausted',
-      }, { status: 402 }); // Payment Required
+      }, { status: 402 });
     }
 
     // Validate provider and tool
-    const provider = providerDb.get(session.providerId);
+    const provider = await providerDb.get(session.providerId);
     if (!provider) {
       return NextResponse.json({
         success: false,
@@ -61,29 +59,34 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     // Create execution record
-    const execution: Execution = {
+    const executionData = {
       id: `exec-${randomUUID()}`,
       sessionId,
       toolId,
       args: args || {},
-      status: 'running',
-      startedAt: new Date(),
+      status: 'running' as const,
     };
 
-    executionDb.create(execution);
+    const execution = await executionDb.create(executionData);
 
     // Simulate execution (in real implementation, this calls provider node)
-    // For MVP: mock execution with random duration
-    const simulatedDurationMs = Math.floor(Math.random() * 5000) + 1000; // 1-6 seconds
-    
+    const simulatedDurationMs = Math.floor(Math.random() * 5000) + 1000;
     await new Promise(resolve => setTimeout(resolve, Math.min(simulatedDurationMs, 2000)));
 
-    // Calculate cost (price per minute → cost for this execution)
+    // Calculate cost
     const durationMinutes = simulatedDurationMs / 60000;
     const cost = Math.ceil(durationMinutes * provider.pricePerMinute);
 
+    // Record micropayment via Yellow Network
+    const yellowSessionId = `yellow-${sessionId}`;
+    const micropayment = recordMicropayment(yellowSessionId, centsToUSDC(cost));
+    
+    if (micropayment) {
+      console.log(`💸 Micropayment recorded: ${cost} cents for execution ${execution.id}`);
+    }
+
     // Update execution
-    const completedExecution = executionDb.update(execution.id, {
+    const completedExecution = await executionDb.update(execution.id, {
       status: 'completed',
       endedAt: new Date(),
       durationMs: simulatedDurationMs,
@@ -94,17 +97,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       },
     });
 
-    // Record micropayment via Yellow Network
-    // This tracks the execution cost in the session ledger
-    const yellowSessionId = `yellow-${sessionId}`;
-    const micropayment = recordMicropayment(yellowSessionId, centsToUSDC(cost));
-    
-    if (micropayment) {
-      console.log(`💸 Micropayment recorded: ${cost} cents for execution ${execution.id}`);
-    }
-
     // Update session totals
-    sessionDb.update(sessionId, {
+    await sessionDb.update(sessionId, {
       consumed: session.consumed + cost,
       effectiveTimeMs: session.effectiveTimeMs + simulatedDurationMs,
     });

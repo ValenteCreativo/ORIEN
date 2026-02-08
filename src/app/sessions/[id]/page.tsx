@@ -221,6 +221,7 @@ export default function SessionDetailPage() {
                 <div className="space-y-3">
                   {session.executions.map(exec => {
                     const execStatus = {
+                      pending: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/20', text: 'text-yellow-400' },
                       running: { bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-400' },
                       completed: { bg: 'bg-green-500/10', border: 'border-green-500/20', text: 'text-green-400' },
                       failed: { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400' },

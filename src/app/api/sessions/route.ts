@@ -14,11 +14,11 @@ export async function GET(request: NextRequest) {
   let sessions: Session[];
 
   if (agentId) {
-    sessions = sessionDb.listByAgent(agentId);
+    sessions = await sessionDb.listByAgent(agentId);
   } else if (providerId) {
-    sessions = sessionDb.listByProvider(providerId);
+    sessions = await sessionDb.listByProvider(providerId);
   } else {
-    sessions = sessionDb.list();
+    sessions = await sessionDb.list();
   }
 
   const response: ApiResponse<Session[]> = {
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     const { agentId, providerId, budgetAllowance } = body;
 
     // Validate agent exists
-    const agent = agentDb.get(agentId);
+    const agent = await agentDb.get(agentId);
     if (!agent) {
       return NextResponse.json({
         success: false,
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate provider exists and is available
-    const provider = providerDb.get(providerId);
+    const provider = await providerDb.get(providerId);
     if (!provider) {
       return NextResponse.json({
         success: false,
@@ -61,19 +61,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Create session
-    const session: Session = {
+    const sessionData = {
       id: `session-${randomUUID()}`,
       agentId,
       providerId,
-      status: 'pending',
-      budgetAllowance: budgetAllowance || 1000, // default $10
+      status: 'pending' as const,
+      budgetAllowance: budgetAllowance || 1000,
       consumed: 0,
       effectiveTimeMs: 0,
-      executions: [],
-      createdAt: new Date(),
     };
 
-    const created = sessionDb.create(session);
+    const created = await sessionDb.create(sessionData);
 
     // Create Yellow session for micropayment tracking
     const yellowSession = createYellowSession(
@@ -81,10 +79,10 @@ export async function POST(request: NextRequest) {
       provider.walletAddress,
       centsToUSDC(budgetAllowance || 1000)
     );
-    console.log(`💳 Yellow session created: ${yellowSession.sessionId} for ORIEN session ${session.id}`);
+    console.log(`💳 Yellow session created: ${yellowSession.sessionId} for ORIEN session ${created.id}`);
 
     // Mark provider as busy
-    providerDb.update(providerId, { status: 'busy' });
+    await providerDb.update(providerId, { status: 'busy' });
 
     const response: ApiResponse<Session & { yellowSessionId: string }> = {
       success: true,
