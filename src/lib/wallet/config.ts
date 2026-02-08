@@ -1,6 +1,6 @@
 // Wallet Configuration - wagmi + RainbowKit
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
-import { mainnet, base, arbitrum, optimism, polygon } from 'wagmi/chains';
+import { mainnet, base, arbitrum, optimism, polygon } from 'viem/chains';
 
 export const config = getDefaultConfig({
   appName: 'ORIEN',
