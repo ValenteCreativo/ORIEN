@@ -3,8 +3,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { sessionDb, providerDb, executionDb } from '@/lib/db';
-import { Execution, ApiResponse, DEFAULT_PAYOUT_SPLIT } from '@/types';
+import { Execution, ApiResponse } from '@/types';
 import { randomUUID } from 'crypto';
+import { recordMicropayment, centsToUSDC } from '@/lib/payments';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -92,6 +93,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         mock: true,
       },
     });
+
+    // Record micropayment via Yellow Network
+    // This tracks the execution cost in the session ledger
+    const yellowSessionId = `yellow-${sessionId}`;
+    const micropayment = recordMicropayment(yellowSessionId, centsToUSDC(cost));
+    
+    if (micropayment) {
+      console.log(`💸 Micropayment recorded: ${cost} cents for execution ${execution.id}`);
+    }
 
     // Update session totals
     sessionDb.update(sessionId, {

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sessionDb, providerDb, agentDb } from '@/lib/db';
 import { Session, ApiResponse } from '@/types';
 import { randomUUID } from 'crypto';
+import { createYellowSession, centsToUSDC } from '@/lib/payments';
 
 // GET /api/sessions - List sessions
 export async function GET(request: NextRequest) {
@@ -74,12 +75,23 @@ export async function POST(request: NextRequest) {
 
     const created = sessionDb.create(session);
 
+    // Create Yellow session for micropayment tracking
+    const yellowSession = createYellowSession(
+      agent.walletAddress,
+      provider.walletAddress,
+      centsToUSDC(budgetAllowance || 1000)
+    );
+    console.log(`💳 Yellow session created: ${yellowSession.sessionId} for ORIEN session ${session.id}`);
+
     // Mark provider as busy
     providerDb.update(providerId, { status: 'busy' });
 
-    const response: ApiResponse<Session> = {
+    const response: ApiResponse<Session & { yellowSessionId: string }> = {
       success: true,
-      data: created,
+      data: {
+        ...created,
+        yellowSessionId: yellowSession.sessionId,
+      },
     };
 
     return NextResponse.json(response, { status: 201 });

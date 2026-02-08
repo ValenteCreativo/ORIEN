@@ -1,7 +1,8 @@
 // ORIEN Session Detail API
 import { NextRequest, NextResponse } from 'next/server';
 import { sessionDb, providerDb, executionDb } from '@/lib/db';
-import { Session, ApiResponse } from '@/types';
+import { Session, ApiResponse, DEFAULT_PAYOUT_SPLIT } from '@/types';
+import { closeYellowSession, executeSettlement, centsToUSDC } from '@/lib/payments';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -65,6 +66,39 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           error: 'Session is not active',
         }, { status: 400 });
       }
+
+      // Close Yellow session and get final totals
+      const yellowSessionId = `yellow-${id}`;
+      const yellowResult = closeYellowSession(yellowSessionId);
+      
+      // Calculate payout split
+      const totalConsumed = session.consumed;
+      const providerPayout = Math.floor(totalConsumed * DEFAULT_PAYOUT_SPLIT.provider / 100);
+      const platformFee = Math.floor(totalConsumed * DEFAULT_PAYOUT_SPLIT.platform / 100);
+      const reserveAmount = totalConsumed - providerPayout - platformFee;
+
+      // Get provider for settlement
+      const provider = providerDb.get(session.providerId);
+
+      // Execute settlement via Circle/Arc
+      const settlement = await executeSettlement({
+        sessionId: id,
+        providerAddress: provider?.walletAddress || '',
+        agentAddress: '', // Would come from session
+        totalAmount: centsToUSDC(totalConsumed),
+        providerPayout: centsToUSDC(providerPayout),
+        platformFee: centsToUSDC(platformFee),
+        reserveAmount: centsToUSDC(reserveAmount),
+      });
+
+      console.log(`💰 Session ${id} settled:`, {
+        total: totalConsumed,
+        providerPayout,
+        platformFee,
+        reserveAmount,
+        txHash: settlement.txHash,
+      });
+
       const updated = sessionDb.update(id, { 
         status: 'completed',
         endedAt: new Date(),
@@ -73,7 +107,18 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       // Free up provider
       providerDb.update(session.providerId, { status: 'online' });
 
-      return NextResponse.json({ success: true, data: updated });
+      return NextResponse.json({ 
+        success: true, 
+        data: {
+          ...updated,
+          settlement: {
+            providerPayout,
+            platformFee,
+            reserveAmount,
+            txHash: settlement.txHash,
+          },
+        },
+      });
     }
 
     // Generic update
