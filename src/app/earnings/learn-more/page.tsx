@@ -20,36 +20,43 @@ export default function LearnMorePage() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="max-w-4xl mx-auto px-6 pt-20 pb-12">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-white via-cyan to-white bg-clip-text text-transparent">
-            Passive Earnings on Idle Capital
+      {/* Content */}
+      <section className="max-w-4xl mx-auto px-6 pt-16 pb-16">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold mb-5 bg-gradient-to-r from-white via-cyan to-white bg-clip-text text-transparent">
+            How Payments & Yield Work
           </h1>
-          <p className="text-xl text-gray/80 max-w-2xl mx-auto">
-            Transform your USDC earnings into yield-generating assets while maintaining liquidity and control.
+          <p className="text-xl text-gray/80 max-w-3xl mx-auto">
+            The value isn’t “fees”. The value is the rail: <span className="text-white">any-token payments → USDC settlement</span>,
+            plus <span className="text-white">offchain micropayments</span> during execution, and optional <span className="text-white">auto-reinvest</span>.
           </p>
         </div>
 
-        {/* The Problem */}
-        <Card className="mb-8 p-8 border-cyan/20">
-          <h2 className="text-2xl font-bold mb-4 text-cyan">Why Reinvest?</h2>
-          <p className="text-gray/90 leading-relaxed mb-4">
-            As a provider, you earn USDC for every minute your infrastructure executes agent missions. 
-            But capital sitting idle in a wallet generates zero returns.
-          </p>
-          <p className="text-gray/90 leading-relaxed">
-            ORIEN enables you to <strong className="text-white">reinvest your earnings automatically</strong> into 
-            battle-tested DeFi protocols—earning passive yield while keeping your capital liquid and accessible.
-          </p>
+        {/* TL;DR */}
+        <Card className="mb-8 p-6 border-cyan/25">
+          <h2 className="text-lg font-bold text-cyan mb-3">TL;DR</h2>
+          <ul className="space-y-2 text-gray/85">
+            <li>
+              <span className="text-white font-semibold">Agents can pay with whatever they hold</span> (LI.FI swaps/bridges).
+            </li>
+            <li>
+              <span className="text-white font-semibold">Providers always receive USDC</span> (Arc/Circle settlement rails).
+            </li>
+            <li>
+              <span className="text-white font-semibold">Yellow batches execution micropayments offchain</span> → one settlement at the end.
+            </li>
+            <li>
+              Providers can <span className="text-white font-semibold">reinvest USDC earnings</span> through LI.FI routes.
+            </li>
+          </ul>
         </Card>
 
-        {/* How It Works */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold mb-8 text-center">How It Works</h2>
-          
+        {/* Flow */}
+        <div className="mb-10">
+          <h2 className="text-3xl font-bold mb-6 text-center">The Rail (End-to-End)</h2>
+
           <div className="space-y-6">
-            {/* Step 1: Yellow */}
+            {/* Step 1 */}
             <Card className="p-6 border-l-4 border-cyan">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-12 h-12 rounded-full bg-cyan/20 flex items-center justify-center text-cyan font-bold text-xl">
@@ -57,23 +64,27 @@ export default function LearnMorePage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
-                    Yellow Session Ledger
-                    <span className="text-xs bg-cyan/20 text-cyan px-2 py-1 rounded">Metering</span>
+                    Yellow: Offchain Session Metering
+                    <span className="text-xs bg-cyan/20 text-cyan px-2 py-1 rounded">micropayments</span>
                   </h3>
                   <p className="text-gray/80 mb-3">
-                    Yellow tracks usage-based debits in real-time during agent execution sessions. 
-                    Every tool call, every execution minute is logged with precision.
+                    During a session, an agent may trigger dozens of tool calls (browser ops, renders, code builds, etc.).
+                    Instead of signing a blockchain transaction for every tiny charge, Yellow keeps a <span className="text-white">session ledger</span> offchain:
+                    <span className="text-white"> many debits → one final settlement</span>.
                   </p>
                   <div className="bg-navy-light/30 p-3 rounded border border-gray/10">
                     <code className="text-sm text-cyan">
-                      Session #42 → Tool: browser.act → 2.3 min → $0.46 USDC
+                      Session #42 → tool.execute(“render”) → +38s effective → debit queued
                     </code>
                   </div>
+                  <p className="text-sm text-gray/70 mt-3">
+                    Value: fast UX, predictable budgets, and clean receipts—without onchain spam.
+                  </p>
                 </div>
               </div>
             </Card>
 
-            {/* Step 2: Arc/Circle */}
+            {/* Step 2 */}
             <Card className="p-6 border-l-4 border-cyan">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-12 h-12 rounded-full bg-cyan/20 flex items-center justify-center text-cyan font-bold text-xl">
@@ -81,31 +92,23 @@ export default function LearnMorePage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
-                    Arc (Circle) Settlement
-                    <span className="text-xs bg-cyan/20 text-cyan px-2 py-1 rounded">USDC</span>
+                    Arc (Circle): USDC Settlement
+                    <span className="text-xs bg-cyan/20 text-cyan px-2 py-1 rounded">payout rails</span>
                   </h3>
                   <p className="text-gray/80 mb-3">
-                    At session end, Arc settles the final balance in USDC. The payout is split transparently:
+                    At session end, Arc settles the net result in <span className="text-white">USDC</span>. Providers receive USDC regardless of how the agent paid.
+                    This gives providers a stable unit of account and clean bookkeeping.
                   </p>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-cyan/5 p-3 rounded border border-cyan/20 text-center">
-                      <div className="text-2xl font-bold text-cyan">90%</div>
-                      <div className="text-xs text-gray/70 mt-1">Provider</div>
-                    </div>
-                    <div className="bg-cyan/5 p-3 rounded border border-cyan/20 text-center">
-                      <div className="text-2xl font-bold text-cyan">7%</div>
-                      <div className="text-xs text-gray/70 mt-1">Platform</div>
-                    </div>
-                    <div className="bg-cyan/5 p-3 rounded border border-cyan/20 text-center">
-                      <div className="text-2xl font-bold text-cyan">3%</div>
-                      <div className="text-xs text-gray/70 mt-1">Reserve</div>
-                    </div>
+                  <div className="bg-navy-light/30 p-3 rounded border border-gray/10">
+                    <code className="text-sm text-cyan">
+                      closeSession(sessionId) → settle in USDC → provider payout
+                    </code>
                   </div>
                 </div>
               </div>
             </Card>
 
-            {/* Step 3: LI.FI */}
+            {/* Step 3 */}
             <Card className="p-6 border-l-4 border-cyan">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-12 h-12 rounded-full bg-cyan/20 flex items-center justify-center text-cyan font-bold text-xl">
@@ -113,142 +116,77 @@ export default function LearnMorePage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
-                    LI.FI Reinvestment Engine
-                    <span className="text-xs bg-cyan/20 text-cyan px-2 py-1 rounded">DeFi</span>
+                    LI.FI: Any Token In → USDC Out (and Reinvest)
+                    <span className="text-xs bg-cyan/20 text-cyan px-2 py-1 rounded">swap/bridge</span>
                   </h3>
-                  <p className="text-gray/80 mb-3">
-                    LI.FI is a cross-chain liquidity aggregator that routes your USDC into yield-generating protocols 
-                    across multiple chains—automatically finding the best rates.
+                  <p className="text-gray/80 mb-4">
+                    Agents don’t want to think about chains, bridges, or what token you accept.
+                    With LI.FI, the agent can pay using what they already have; LI.FI handles swap/bridge so the settlement lands as <span className="text-white">USDC</span>.
                   </p>
-                  
-                  <div className="space-y-3">
+
+                  <div className="grid gap-3">
                     <div className="bg-navy-light/30 p-4 rounded border border-gray/10">
-                      <h4 className="font-semibold text-sm mb-2 text-cyan">Multi-Chain Access</h4>
+                      <h4 className="font-semibold text-sm mb-1 text-cyan">For Agents</h4>
                       <p className="text-sm text-gray/70">
-                        Access lending protocols on Ethereum, Polygon, Arbitrum, Optimism—all through one interface.
+                        Pay with ETH, USDT, DAI, or other supported assets → LI.FI routes the best path → ORIEN settles in USDC.
                       </p>
                     </div>
-                    
                     <div className="bg-navy-light/30 p-4 rounded border border-gray/10">
-                      <h4 className="font-semibold text-sm mb-2 text-cyan">Optimal Routing</h4>
+                      <h4 className="font-semibold text-sm mb-1 text-cyan">For Providers</h4>
                       <p className="text-sm text-gray/70">
-                        LI.FI automatically compares rates across Aave, Compound, Yearn, and other battle-tested protocols.
-                      </p>
-                    </div>
-                    
-                    <div className="bg-navy-light/30 p-4 rounded border border-gray/10">
-                      <h4 className="font-semibold text-sm mb-2 text-cyan">No Lock-Ups</h4>
-                      <p className="text-sm text-gray/70">
-                        Your capital remains liquid. Withdraw earnings or reinvest at any time—no vesting, no penalties.
+                        Optional: reinvest USDC earnings into DeFi routes (lending/vault strategies) while keeping liquidity.
                       </p>
                     </div>
                   </div>
+
+                  <p className="text-sm text-gray/60 mt-3">
+                    Note: DeFi yield is variable and carries smart contract + market risk.
+                  </p>
                 </div>
               </div>
             </Card>
           </div>
         </div>
 
-        {/* Example Flow */}
-        <Card className="mb-8 p-8 bg-gradient-to-br from-cyan/5 to-transparent border-cyan/30">
-          <h2 className="text-2xl font-bold mb-6 text-center">Example: $1,000 Monthly Earnings</h2>
-          
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-navy-light/40 rounded">
-              <span className="text-gray/80">Gross earnings (USDC)</span>
-              <span className="font-mono text-xl text-white">$1,000.00</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-4 bg-navy-light/40 rounded">
-              <span className="text-gray/80">Your share (90%)</span>
-              <span className="font-mono text-xl text-cyan">$900.00</span>
-            </div>
-            
-            <div className="border-t border-gray/20 pt-4">
-              <div className="flex items-center justify-between p-4 bg-cyan/10 rounded">
-                <div>
-                  <div className="font-semibold text-white">Reinvested → Aave USDC (via LI.FI)</div>
-                  <div className="text-sm text-gray/70 mt-1">Estimated APY: 4.2%</div>
-                </div>
-                <div className="text-right">
-                  <div className="font-mono text-xl text-cyan">$900.00</div>
-                  <div className="text-sm text-cyan/70 mt-1">+$3.15/month passive</div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="text-center text-sm text-gray/60 pt-4">
-              *APY rates are variable and depend on market conditions. Past performance ≠ future results.
-            </div>
-          </div>
-        </Card>
+        {/* Mini FAQ */}
+        <Card className="p-6 border-gray/20">
+          <h2 className="text-2xl font-bold mb-4">FAQ</h2>
 
-        {/* Security & Trust */}
-        <Card className="mb-8 p-8 border-gray/20">
-          <h2 className="text-2xl font-bold mb-4">Security & Trust</h2>
-          
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="text-cyan text-xl">✓</div>
-              <div>
-                <h3 className="font-semibold mb-1">Non-Custodial</h3>
-                <p className="text-sm text-gray/80">
-                  You maintain full control. ORIEN never holds your funds—settlements go directly to your wallet.
-                </p>
+          <div className="space-y-4 text-gray/85">
+            <div>
+              <div className="font-semibold text-white">Where do the “many debits → one settlement” receipts come from?</div>
+              <div className="text-sm text-gray/75 mt-1">
+                Yellow maintains the session ledger offchain during execution and produces a final settlement summary at close.
               </div>
             </div>
-            
-            <div className="flex items-start gap-3">
-              <div className="text-cyan text-xl">✓</div>
-              <div>
-                <h3 className="font-semibold mb-1">Battle-Tested Protocols</h3>
-                <p className="text-sm text-gray/80">
-                  LI.FI routes to audited, time-proven DeFi protocols with billions in TVL (Aave, Compound, Yearn).
-                </p>
+
+            <div>
+              <div className="font-semibold text-white">Do providers have to accept every token?</div>
+              <div className="text-sm text-gray/75 mt-1">
+                No. Providers receive USDC; LI.FI is the layer that normalizes agent payments into USDC.
               </div>
             </div>
-            
-            <div className="flex items-start gap-3">
-              <div className="text-cyan text-xl">✓</div>
-              <div>
-                <h3 className="font-semibold mb-1">Transparent Splits</h3>
-                <p className="text-sm text-gray/80">
-                  Every transaction is on-chain and auditable. No hidden fees, no surprises.
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <div className="text-cyan text-xl">✓</div>
-              <div>
-                <h3 className="font-semibold mb-1">Instant Liquidity</h3>
-                <p className="text-sm text-gray/80">
-                  Withdraw your capital + yield at any time. No lock-ups, no waiting periods.
-                </p>
+
+            <div>
+              <div className="font-semibold text-white">What about payout splits (provider/platform/reserve)?</div>
+              <div className="text-sm text-gray/75 mt-1">
+                Splits are applied at settlement time. The core concept remains: effective usage is metered, and settlement is done once per session.
               </div>
             </div>
           </div>
         </Card>
 
-        {/* CTA */}
-        <div className="text-center">
+        <div className="text-center mt-10">
           <Link href="/earnings">
             <Button size="lg" className="px-8">
-              View Your Earnings Dashboard
+              Back to Earnings
             </Button>
           </Link>
-          <p className="text-sm text-gray/60 mt-4">
-            Start earning passive yield on your USDC today
+          <p className="text-xs text-gray/60 mt-4">
+            ORIEN is an orchestration rail — not financial advice.
           </p>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-gray/20 mt-20 py-8">
-        <div className="max-w-7xl mx-auto px-6 text-center text-sm text-gray/60">
-          <p>ORIEN is an orchestration rail. Not financial advice. DeFi yields are variable and carry smart contract risk.</p>
-        </div>
-      </footer>
     </div>
   );
 }
