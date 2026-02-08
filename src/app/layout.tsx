@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { DemoProvider } from '@/components/ui/DemoToggle';
+import { WalletProvider } from '@/components/providers/WalletProvider';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -43,9 +44,12 @@ export const metadata: Metadata = {
     follow: true,
   },
   icons: {
-    icon: '/logo.png',
-    shortcut: '/logo.png',
-    apple: '/logo.png',
+    icon: [
+      { url: '/favicon.png', type: 'image/png' },
+      { url: '/favicon.ico', type: 'image/x-icon' },
+    ],
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
   },
 };
 
@@ -59,11 +63,15 @@ export default function RootLayout({
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="apple-touch-icon" href="/favicon.png" />
       </head>
       <body className={`${inter.className} antialiased bg-navy text-white`}>
-        <DemoProvider>
-          {children}
-        </DemoProvider>
+        <WalletProvider>
+          <DemoProvider>
+            {children}
+          </DemoProvider>
+        </WalletProvider>
       </body>
     </html>
   );

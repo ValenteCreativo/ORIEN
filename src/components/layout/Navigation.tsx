@@ -1,35 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useDemo } from '@/components/ui';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 const navLinks = [
   { href: '/marketplace', label: 'Marketplace' },
-  { href: '/earnings', label: 'My Profile' },
+  { href: '/sessions', label: 'Sessions' },
+  { href: '/earnings', label: 'Earnings' },
 ];
 
 export function Navigation() {
   const pathname = usePathname();
-  const { demoMode } = useDemo();
-  const [walletConnected, setWalletConnected] = useState(false);
-  const [showWalletMenu, setShowWalletMenu] = useState(false);
-
-  // Demo wallet address
-  const demoAddress = '0x1a2b...3c4d';
-  const demoEns = 'agent.orien.eth';
-
-  const handleConnect = () => {
-    // In demo mode, just toggle connected state
-    if (demoMode) {
-      setWalletConnected(true);
-    } else {
-      // In production, this would trigger actual wallet connect
-      setWalletConnected(true);
-    }
-  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[#0A1128]/80 border-b border-[#00F5FF]/10">
@@ -53,69 +36,85 @@ export function Navigation() {
               {link.label}
             </Link>
           ))}
-          {/* Sessions link - visible when wallet connected */}
-          {walletConnected && (
-            <Link 
-              href="/sessions" 
-              className={`transition-colors ${
-                pathname.startsWith('/sessions')
-                  ? 'text-[#00F5FF]'
-                  : 'text-[#A2AAAD] hover:text-[#00F5FF]'
-              }`}
-            >
-              Sessions
-            </Link>
-          )}
         </div>
         
-        {/* Wallet Section */}
-        <div className="flex items-center gap-3">
-          {walletConnected ? (
-            <div className="relative">
-              <button
-                onClick={() => setShowWalletMenu(!showWalletMenu)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#00F5FF]/10 border border-[#00F5FF]/30 text-[#00F5FF] rounded-full hover:bg-[#00F5FF]/20 transition-all"
-              >
-                <span className="w-2 h-2 bg-green-400 rounded-full" />
-                {demoMode ? demoEns : demoAddress}
-              </button>
+        {/* Real Wallet Connection */}
+        <ConnectButton.Custom>
+          {({
+            account,
+            chain,
+            openAccountModal,
+            openChainModal,
+            openConnectModal,
+            mounted,
+          }) => {
+            const ready = mounted;
+            const connected = ready && account && chain;
 
-              {showWalletMenu && (
-                <div className="absolute right-0 top-12 w-48 bg-[#0A1128] border border-[#A2AAAD]/20 rounded-xl shadow-xl overflow-hidden">
-                  <div className="p-3 border-b border-[#A2AAAD]/10">
-                    <div className="text-xs text-[#A2AAAD]">Connected as</div>
-                    <div className="text-sm text-white font-mono">{demoAddress}</div>
-                    {demoMode && (
-                      <div className="text-xs text-[#00F5FF]">{demoEns}</div>
-                    )}
-                  </div>
-                  <Link href="/earnings" className="block px-3 py-2 text-sm text-[#A2AAAD] hover:bg-[#00F5FF]/10 hover:text-[#00F5FF]">
-                    My Profile
-                  </Link>
-                  <Link href="/sessions" className="block px-3 py-2 text-sm text-[#A2AAAD] hover:bg-[#00F5FF]/10 hover:text-[#00F5FF]">
-                    Sessions
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setWalletConnected(false);
-                      setShowWalletMenu(false);
-                    }}
-                    className="w-full px-3 py-2 text-sm text-left text-red-400 hover:bg-red-500/10"
-                  >
-                    Disconnect
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <button
-              onClick={handleConnect}
-              className="px-5 py-2 text-sm font-medium bg-[#00F5FF]/10 border border-[#00F5FF]/30 text-[#00F5FF] rounded-full hover:bg-[#00F5FF]/20 hover:border-[#00F5FF]/50 transition-all"
-            >
-              Connect Wallet
-            </button>
-          )}
-        </div>
+            return (
+              <div
+                {...(!ready && {
+                  'aria-hidden': true,
+                  style: {
+                    opacity: 0,
+                    pointerEvents: 'none',
+                    userSelect: 'none',
+                  },
+                })}
+              >
+                {(() => {
+                  if (!connected) {
+                    return (
+                      <button
+                        onClick={openConnectModal}
+                        className="px-5 py-2 text-sm font-medium bg-[#00F5FF]/10 border border-[#00F5FF]/30 text-[#00F5FF] rounded-full hover:bg-[#00F5FF]/20 hover:border-[#00F5FF]/50 transition-all"
+                      >
+                        Connect Wallet
+                      </button>
+                    );
+                  }
+
+                  if (chain.unsupported) {
+                    return (
+                      <button
+                        onClick={openChainModal}
+                        className="px-4 py-2 text-sm font-medium bg-red-500/20 border border-red-500/30 text-red-400 rounded-full hover:bg-red-500/30 transition-all"
+                      >
+                        Wrong Network
+                      </button>
+                    );
+                  }
+
+                  return (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={openChainModal}
+                        className="hidden sm:flex items-center gap-2 px-3 py-2 text-sm bg-[#0A1128]/60 border border-[#A2AAAD]/20 text-[#A2AAAD] rounded-full hover:border-[#00F5FF]/30 transition-all"
+                      >
+                        {chain.hasIcon && chain.iconUrl && (
+                          <img
+                            alt={chain.name ?? 'Chain'}
+                            src={chain.iconUrl}
+                            className="w-4 h-4 rounded-full"
+                          />
+                        )}
+                        <span>{chain.name}</span>
+                      </button>
+
+                      <button
+                        onClick={openAccountModal}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#00F5FF]/10 border border-[#00F5FF]/30 text-[#00F5FF] rounded-full hover:bg-[#00F5FF]/20 transition-all"
+                      >
+                        <span className="w-2 h-2 bg-green-400 rounded-full" />
+                        {account.ensName || account.displayName}
+                      </button>
+                    </div>
+                  );
+                })()}
+              </div>
+            );
+          }}
+        </ConnectButton.Custom>
       </div>
     </nav>
   );

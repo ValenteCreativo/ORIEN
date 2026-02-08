@@ -22,22 +22,20 @@ export default function StrategiesPage() {
 
         {/* Payment Flow Overview */}
         <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#00F5FF]/20 p-8 mb-8">
-          <h2 className="text-xl font-semibold text-white mb-6">The Payment Flow</h2>
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <h2 className="text-lg font-semibold text-white mb-6">The Payment Flow</h2>
+          <div className="grid grid-cols-4 gap-4">
             {[
-              { step: '1', label: 'Agent Pays', desc: 'Any token', color: 'from-blue-500' },
-              { step: '2', label: 'LI.FI Swaps', desc: 'Auto → USDC', color: 'from-purple-500' },
-              { step: '3', label: 'Yellow Batches', desc: 'Off-chain', color: 'from-yellow-500' },
-              { step: '4', label: 'Circle Settles', desc: 'On-chain USDC', color: 'from-green-500' },
+              { step: '01', label: 'Agent Pays', desc: 'Any token' },
+              { step: '02', label: 'LI.FI Swaps', desc: 'Auto → USDC' },
+              { step: '03', label: 'Yellow Batches', desc: 'Off-chain' },
+              { step: '04', label: 'Circle Settles', desc: 'On-chain USDC' },
             ].map((item, i) => (
-              <div key={i} className="flex-1 text-center">
-                <div className={`w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br ${item.color} to-[#0A1128] flex items-center justify-center text-white font-bold`}>
-                  {item.step}
-                </div>
-                <div className="font-medium text-white">{item.label}</div>
-                <div className="text-sm text-[#A2AAAD]">{item.desc}</div>
+              <div key={i} className="relative text-center">
+                <div className="text-[10px] text-[#00F5FF]/60 font-mono mb-2">{item.step}</div>
+                <div className="text-sm font-medium text-white mb-1">{item.label}</div>
+                <div className="text-xs text-[#A2AAAD]">{item.desc}</div>
                 {i < 3 && (
-                  <div className="hidden md:block absolute text-[#A2AAAD]/30 text-2xl" style={{right: '-1rem', top: '50%'}}>→</div>
+                  <div className="hidden md:block absolute top-1/2 -right-2 text-[#A2AAAD]/30">→</div>
                 )}
               </div>
             ))}
@@ -46,8 +44,7 @@ export default function StrategiesPage() {
 
         {/* LI.FI Section */}
         <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 overflow-hidden mb-6">
-          <div className="px-6 py-4 border-b border-[#A2AAAD]/10 flex items-center gap-3">
-            <span className="text-2xl">🔀</span>
+          <div className="px-6 py-4 border-b border-[#A2AAAD]/10">
             <h2 className="text-lg font-semibold text-white">LI.FI — Pay With Any Token</h2>
           </div>
           <div className="p-6">
@@ -55,28 +52,28 @@ export default function StrategiesPage() {
               Agents don&apos;t need to hold USDC. They can pay with <span className="text-white">ETH, MATIC, ARB, or 100+ other tokens</span>. 
               LI.FI automatically finds the best route and swaps to USDC before the payment reaches the provider.
             </p>
-            <div className="bg-[#0A1128] rounded-xl p-4 mb-4">
-              <div className="text-sm text-[#A2AAAD] mb-2">Example:</div>
-              <div className="flex items-center gap-4 text-sm">
-                <div className="px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg">Agent pays 0.05 ETH</div>
-                <span className="text-[#A2AAAD]">→</span>
-                <div className="px-3 py-1.5 bg-purple-500/20 text-purple-400 rounded-lg">LI.FI swaps</div>
-                <span className="text-[#A2AAAD]">→</span>
-                <div className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg">Provider receives $150 USDC</div>
+            <div className="bg-[#0A1128] rounded-xl p-4 mb-4 border border-[#A2AAAD]/10">
+              <div className="text-xs text-[#A2AAAD]/60 mb-3 uppercase tracking-wider">Example</div>
+              <div className="flex items-center gap-3 text-sm">
+                <span className="px-3 py-1.5 bg-[#A2AAAD]/10 text-[#A2AAAD] rounded-lg font-mono">0.05 ETH</span>
+                <span className="text-[#00F5FF]">→</span>
+                <span className="text-[#A2AAAD]">LI.FI</span>
+                <span className="text-[#00F5FF]">→</span>
+                <span className="px-3 py-1.5 bg-[#00F5FF]/10 text-[#00F5FF] rounded-lg font-mono">$150 USDC</span>
               </div>
             </div>
             <ul className="space-y-2 text-sm text-[#A2AAAD]">
               <li className="flex items-start gap-2">
-                <span className="text-[#00F5FF]">✓</span>
-                Cross-chain: Pay from Ethereum, receive on Base
+                <span className="text-[#00F5FF] mt-0.5">✓</span>
+                <span><span className="text-white">Cross-chain:</span> Pay from Ethereum, receive on Base</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#00F5FF]">✓</span>
-                Best rates: Aggregates across 15+ DEXs
+                <span className="text-[#00F5FF] mt-0.5">✓</span>
+                <span><span className="text-white">Best rates:</span> Aggregates across 15+ DEXs</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#00F5FF]">✓</span>
-                No slippage surprises: Quotes locked at session start
+                <span className="text-[#00F5FF] mt-0.5">✓</span>
+                <span><span className="text-white">No surprises:</span> Quotes locked at session start</span>
               </li>
             </ul>
           </div>
@@ -84,18 +81,17 @@ export default function StrategiesPage() {
 
         {/* Yellow Section */}
         <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 overflow-hidden mb-6">
-          <div className="px-6 py-4 border-b border-[#A2AAAD]/10 flex items-center gap-3">
-            <span className="text-2xl">⚡</span>
-            <h2 className="text-lg font-semibold text-white">Yellow — Micropayments, No Gas</h2>
+          <div className="px-6 py-4 border-b border-[#A2AAAD]/10">
+            <h2 className="text-lg font-semibold text-white">Yellow — Micropayments Without Gas</h2>
           </div>
           <div className="p-6">
             <p className="text-[#A2AAAD] mb-4">
               During a session, the agent might execute 50 small tasks. Instead of 50 on-chain transactions, 
               Yellow batches them <span className="text-white">off-chain</span>. Only <span className="text-white">one transaction</span> is signed at the end.
             </p>
-            <div className="bg-[#0A1128] rounded-xl p-4 mb-4">
-              <div className="text-sm text-[#A2AAAD] mb-3">Session with 12 executions:</div>
-              <div className="space-y-2 text-xs font-mono">
+            <div className="bg-[#0A1128] rounded-xl p-4 mb-4 border border-[#A2AAAD]/10">
+              <div className="text-xs text-[#A2AAAD]/60 mb-3 uppercase tracking-wider">Session with 12 executions</div>
+              <div className="space-y-1.5 text-xs font-mono">
                 <div className="flex justify-between text-[#A2AAAD]/60">
                   <span>exec_001: render_frame</span>
                   <span>$0.12</span>
@@ -108,25 +104,25 @@ export default function StrategiesPage() {
                   <span>exec_003: export_video</span>
                   <span>$0.45</span>
                 </div>
-                <div className="text-[#A2AAAD]/40 text-center">... 9 more executions ...</div>
-                <div className="pt-2 border-t border-[#A2AAAD]/10 flex justify-between text-[#00F5FF]">
-                  <span>Total (1 tx)</span>
-                  <span>$4.28</span>
+                <div className="text-center text-[#A2AAAD]/30 py-1">⋮</div>
+                <div className="pt-2 border-t border-[#A2AAAD]/10 flex justify-between">
+                  <span className="text-[#A2AAAD]">Total (1 tx)</span>
+                  <span className="text-[#00F5FF]">$4.28</span>
                 </div>
               </div>
             </div>
             <ul className="space-y-2 text-sm text-[#A2AAAD]">
               <li className="flex items-start gap-2">
-                <span className="text-[#00F5FF]">✓</span>
-                Gas savings: 1 tx instead of N txs
+                <span className="text-[#00F5FF] mt-0.5">✓</span>
+                <span><span className="text-white">Gas savings:</span> 1 tx instead of N txs</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#00F5FF]">✓</span>
-                Real-time metering: Costs tracked per-millisecond
+                <span className="text-[#00F5FF] mt-0.5">✓</span>
+                <span><span className="text-white">Real-time:</span> Costs tracked per-millisecond</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#00F5FF]">✓</span>
-                Dispute protection: All executions logged before settlement
+                <span className="text-[#00F5FF] mt-0.5">✓</span>
+                <span><span className="text-white">Protected:</span> All executions logged before settlement</span>
               </li>
             </ul>
           </div>
@@ -134,8 +130,7 @@ export default function StrategiesPage() {
 
         {/* Circle/Arc Section */}
         <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 overflow-hidden mb-6">
-          <div className="px-6 py-4 border-b border-[#A2AAAD]/10 flex items-center gap-3">
-            <span className="text-2xl">💵</span>
+          <div className="px-6 py-4 border-b border-[#A2AAAD]/10">
             <h2 className="text-lg font-semibold text-white">Circle + Arc — Instant USDC Settlement</h2>
           </div>
           <div className="p-6">
@@ -144,12 +139,12 @@ export default function StrategiesPage() {
               Arc handles the <span className="text-white">90/7/3 split</span> automatically—provider gets 90%, 
               platform takes 7%, 3% goes to the reserve.
             </p>
-            <div className="bg-[#0A1128] rounded-xl p-4 mb-4">
-              <div className="text-sm text-[#A2AAAD] mb-3">Settlement breakdown ($10.00 session):</div>
+            <div className="bg-[#0A1128] rounded-xl p-4 mb-4 border border-[#A2AAAD]/10">
+              <div className="text-xs text-[#A2AAAD]/60 mb-3 uppercase tracking-wider">Settlement: $10.00 session</div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[#A2AAAD]">Provider (90%)</span>
-                  <span className="text-green-400 font-medium">$9.00</span>
+                  <span className="text-[#00F5FF] font-medium">$9.00</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[#A2AAAD]/60">Platform (7%)</span>
@@ -163,38 +158,33 @@ export default function StrategiesPage() {
             </div>
             <ul className="space-y-2 text-sm text-[#A2AAAD]">
               <li className="flex items-start gap-2">
-                <span className="text-[#00F5FF]">✓</span>
-                Instant: No waiting for confirmations
+                <span className="text-[#00F5FF] mt-0.5">✓</span>
+                <span><span className="text-white">Instant:</span> No waiting for confirmations</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#00F5FF]">✓</span>
-                Stable: Always USDC, no volatility
+                <span className="text-[#00F5FF] mt-0.5">✓</span>
+                <span><span className="text-white">Stable:</span> Always USDC, no volatility</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#00F5FF]">✓</span>
-                Transparent: Every settlement on-chain
+                <span className="text-[#00F5FF] mt-0.5">✓</span>
+                <span><span className="text-white">Transparent:</span> Every settlement on-chain</span>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Reinvestment */}
-        <div className="bg-gradient-to-r from-[#00F5FF]/10 to-purple-500/10 rounded-xl border border-[#00F5FF]/20 p-6">
-          <div className="flex items-start gap-4">
-            <span className="text-3xl">📈</span>
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-2">Auto-Reinvest Your Earnings</h3>
-              <p className="text-[#A2AAAD] mb-4">
-                Don&apos;t let your USDC sit idle. Enable auto-reinvest to deploy earnings to 
-                Aave, Compound, or Yearn—earning 3-6% APY while you wait for withdrawals.
-              </p>
-              <Link href="/earnings">
-                <button className="px-5 py-2 text-sm font-medium bg-[#00F5FF] text-[#0A1128] rounded-full hover:shadow-[0_0_20px_rgba(0,245,255,0.3)] transition-all">
-                  Configure Auto-Reinvest →
-                </button>
-              </Link>
-            </div>
-          </div>
+        {/* Reinvestment CTA */}
+        <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#00F5FF]/20 p-6">
+          <h3 className="text-lg font-semibold text-white mb-2">Auto-Reinvest Your Earnings</h3>
+          <p className="text-[#A2AAAD] mb-4 text-sm">
+            Don&apos;t let your USDC sit idle. Enable auto-reinvest to deploy earnings to 
+            Aave, Compound, or Yearn—earning 3-6% APY while you wait for withdrawals.
+          </p>
+          <Link href="/earnings">
+            <button className="px-5 py-2 text-sm font-medium bg-[#00F5FF] text-[#0A1128] rounded-full hover:shadow-[0_0_20px_rgba(0,245,255,0.3)] transition-all">
+              Configure Auto-Reinvest →
+            </button>
+          </Link>
         </div>
       </div>
     </PageWrapper>
