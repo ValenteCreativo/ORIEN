@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    data: settlements.map(s => ({
+    data: settlements.map((s: any) => ({
       id: s.id,
       sessionId: s.sessionId,
       totalAmount: s.totalAmount,
