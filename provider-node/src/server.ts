@@ -118,7 +118,7 @@ fastify.setErrorHandler((error, request, reply) => {
   fastify.log.error(error);
   reply.code(500).send({
     error: 'Internal server error',
-    message: error.message,
+    message: error instanceof Error ? error.message : 'Unknown error',
   });
 });
 

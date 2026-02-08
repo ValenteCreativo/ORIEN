@@ -1,11 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Provider, ApiResponse } from '@/types';
 import { Button, Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 
-export default function NewSessionPage() {
+// Loading component for Suspense fallback
+function LoadingState() {
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-12">
+      <Card>
+        <CardContent className="text-center py-8">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-zinc-700 border-t-blue-500 mb-4"></div>
+          <p className="text-zinc-500">Loading...</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// Inner component that uses useSearchParams
+function NewSessionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const providerId = searchParams.get('provider');
@@ -203,5 +218,14 @@ export default function NewSessionPage() {
         </Button>
       </div>
     </div>
+  );
+}
+
+// Main page component with Suspense wrapper
+export default function NewSessionPage() {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <NewSessionContent />
+    </Suspense>
   );
 }
