@@ -38,19 +38,21 @@ export default function HomePage() {
 
         {/* Hero */}
         <section className="min-h-screen flex items-center justify-center px-6 pt-20">
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="relative max-w-4xl mx-auto text-center">
             
             {/* Subtle glow effect */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#00F5FF]/5 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-[600px] h-[600px] bg-[#00F5FF]/5 rounded-full blur-[120px]" />
+            </div>
             
             {/* Logo */}
-            <div className="mb-6 relative">
+            <div className="relative mb-6 flex justify-center">
               <Image 
                 src="/logo.png" 
                 alt="ORIEN" 
                 width={80} 
                 height={80}
-                className="mx-auto opacity-90"
+                className="opacity-90"
               />
             </div>
 
@@ -108,7 +110,7 @@ export default function HomePage() {
 
         {/* How It Works */}
         <section id="how-it-works" className="py-24 px-6">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-5xl mx-auto w-full">
             
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
@@ -147,7 +149,7 @@ export default function HomePage() {
 
         {/* Compute Stacks */}
         <section className="py-24 px-6 border-t border-[#A2AAAD]/10">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-5xl mx-auto w-full">
             
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
