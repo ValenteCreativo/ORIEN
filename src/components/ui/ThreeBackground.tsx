@@ -2,50 +2,42 @@
 
 import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
+import { Points, PointMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 
 function ParticleField() {
-  const points = useRef<THREE.Points>(null);
+  const ref = useRef<THREE.Points>(null);
   
-  const particlesPosition = useMemo(() => {
+  const particles = useMemo(() => {
     const positions = new Float32Array(5000 * 3);
     
     for (let i = 0; i < 5000; i++) {
-      const i3 = i * 3;
-      positions[i3] = (Math.random() - 0.5) * 100;
-      positions[i3 + 1] = (Math.random() - 0.5) * 100;
-      positions[i3 + 2] = (Math.random() - 0.5) * 100;
+      positions[i * 3] = (Math.random() - 0.5) * 100;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
     }
     
     return positions;
   }, []);
 
   useFrame((state) => {
-    if (points.current) {
-      points.current.rotation.x = state.clock.elapsedTime * 0.05;
-      points.current.rotation.y = state.clock.elapsedTime * 0.075;
+    if (ref.current) {
+      ref.current.rotation.x = state.clock.elapsedTime * 0.05;
+      ref.current.rotation.y = state.clock.elapsedTime * 0.075;
     }
   });
 
   return (
-    <points ref={points}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particlesPosition.length / 3}
-          array={particlesPosition}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.15}
-        color="#00F5FF"
-        sizeAttenuation
+    <Points ref={ref} positions={particles} stride={3} frustumCulled={false}>
+      <PointMaterial
         transparent
+        color="#00F5FF"
+        size={0.15}
+        sizeAttenuation={true}
+        depthWrite={false}
         opacity={0.8}
-        blending={THREE.AdditiveBlending}
       />
-    </points>
+    </Points>
   );
 }
 
@@ -53,18 +45,20 @@ function WaveGrid() {
   const mesh = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
-    if (mesh.current) {
+    if (mesh.current && mesh.current.geometry) {
       const time = state.clock.elapsedTime;
-      const position = mesh.current.geometry.attributes.position;
+      const positionAttribute = mesh.current.geometry.getAttribute('position');
       
-      for (let i = 0; i < position.count; i++) {
-        const x = position.getX(i);
-        const y = position.getY(i);
-        const wave = Math.sin(x * 0.5 + time) * Math.cos(y * 0.5 + time) * 2;
-        position.setZ(i, wave);
+      if (positionAttribute) {
+        for (let i = 0; i < positionAttribute.count; i++) {
+          const x = positionAttribute.getX(i);
+          const y = positionAttribute.getY(i);
+          const wave = Math.sin(x * 0.5 + time) * Math.cos(y * 0.5 + time) * 2;
+          positionAttribute.setZ(i, wave);
+        }
+        
+        positionAttribute.needsUpdate = true;
       }
-      
-      position.needsUpdate = true;
     }
   });
 
