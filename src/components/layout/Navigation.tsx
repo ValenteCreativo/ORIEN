@@ -7,6 +7,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 const navLinks = [
   { href: '/marketplace', label: 'Marketplace' },
+  { href: '/network', label: 'Network' },
   { href: '/sessions', label: 'Sessions' },
   { href: '/earnings', label: 'Earnings' },
 ];
