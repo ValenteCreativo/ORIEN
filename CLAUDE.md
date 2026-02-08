@@ -20,7 +20,7 @@ Agents rent specialized compute (Mac minis, servers with expensive software) and
 | 1 - Core APIs | ✅ Done | Provider registry, sessions, metering, payments |
 | 2 - Frontend | 🔨 In Progress | Marketplace UI, session console, earnings |
 | 3 - Provider Node | ⏳ Pending | Real execution host, tool API |
-| 4 - Payment Rails | ⏳ Pending | Yellow, Arc/Circle, LI.FI integration |
+| 4 - Payment Rails | ✅ Done | Yellow, Arc/Circle, LI.FI integration |
 | 5 - Production | ⏳ Pending | Real DB, auth, deployment |
 
 ---
@@ -108,6 +108,8 @@ src/
 
 | Date | Branch | Commit | Description | Status |
 |------|--------|--------|-------------|--------|
+| 2026-02-08 | main | 07dc4c6 | Payment rails integration (Yellow, Circle, LI.FI) | ✅ Merged |
+| 2026-02-08 | main | 1c38d38 | CLAUDE.md project context | ✅ Merged |
 | 2026-02-08 | main | 4dabcef | Initial architecture + MVP scaffold | ✅ Merged |
 
 ---
@@ -134,10 +136,16 @@ src/
 - [ ] Tool registration system
 - [ ] Execution sandbox design
 
-### Phase 4: Payment Rails (kukulcán)
-- [ ] Yellow SDK integration (session ledger)
-- [ ] Arc/Circle integration (USDC payouts)
-- [ ] LI.FI integration (pay-with-anything, reinvestment)
+### Phase 4: Payment Rails (kukulcán) ✅ COMPLETED
+- [x] Yellow SDK integration (session ledger) - MVP in-memory
+- [x] Arc/Circle integration (USDC payouts) - test keys configured
+- [x] LI.FI integration (pay-with-anything, reinvestment)
+- [x] New endpoints: /api/payments/quote, /api/payments/reinvest
+
+### Phase 5: Production
+- [ ] Real database (PostgreSQL/Convex)
+- [ ] Wallet authentication
+- [ ] Deployment (Vercel)
 
 ---
 
