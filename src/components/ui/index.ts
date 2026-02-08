@@ -5,3 +5,4 @@ export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 export { PriceDisplay } from './PriceDisplay';
 export { StatCard } from './StatCard';
 export { ProgressBar } from './ProgressBar';
+export { ParticlesBackground } from './ParticlesBackground';

@@ -37,38 +37,38 @@ interface ReinvestmentStrategy {
 const STRATEGIES: ReinvestmentStrategy[] = [
   {
     id: 'aave-usdc',
-    name: 'Aave USDC Lending',
+    name: 'Aave USDC',
     protocol: 'Aave V3',
     apy: 4.2,
     risk: 'low',
-    description: 'Supply USDC to Aave for stable, low-risk yield',
+    description: 'Stable lending protocol',
     icon: '🏦',
   },
   {
     id: 'compound-usdc',
-    name: 'Compound USDC',
+    name: 'Compound',
     protocol: 'Compound',
     apy: 3.8,
     risk: 'low',
-    description: 'Lend USDC on Compound protocol',
+    description: 'Established DeFi protocol',
     icon: '📊',
   },
   {
     id: 'stargate-usdc',
-    name: 'Stargate USDC LP',
+    name: 'Stargate LP',
     protocol: 'Stargate',
     apy: 6.5,
     risk: 'medium',
-    description: 'Provide liquidity for cross-chain USDC transfers',
+    description: 'Cross-chain liquidity',
     icon: '🌉',
   },
   {
     id: 'yearn-usdc',
-    name: 'Yearn USDC Vault',
+    name: 'Yearn Vault',
     protocol: 'Yearn',
     apy: 5.1,
     risk: 'medium',
-    description: 'Automated yield farming strategies',
+    description: 'Auto-optimized yield',
     icon: '🚜',
   },
 ];
@@ -90,17 +90,7 @@ export default function EarningsPage() {
   }, []);
 
   const totalEarnings = settlements.reduce((sum, s) => sum + s.providerPayout, 0);
-  const pendingWithdrawal = totalEarnings; // Simplified - in real app track withdrawals
-  
-  // Calculate projected earnings
-  const avgSessionValue = settlements.length > 0 
-    ? totalEarnings / settlements.length 
-    : 500; // $5 average
-  const projectedMonthlyEarnings = avgSessionValue * 30; // Assume 1 session/day
-  const selectedStrategyAPY = selectedStrategy 
-    ? STRATEGIES.find(s => s.id === selectedStrategy)?.apy || 0
-    : 0;
-  const yearlyCompound = pendingWithdrawal * (1 + selectedStrategyAPY / 100) - pendingWithdrawal;
+  const pendingWithdrawal = totalEarnings;
 
   if (loading) {
     return (
@@ -119,19 +109,17 @@ export default function EarningsPage() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Provider Earnings</h1>
         <p className="text-zinc-500">
-          Track your compute revenue and reinvest earnings into DeFi strategies for compound returns
+          Track revenue from compute rental
         </p>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <StatCard
           label="Total Earned"
           value={`$${(totalEarnings / 100).toFixed(2)}`}
           icon="💰"
           variant="success"
-          trend="up"
-          trendValue="+12% this week"
         />
         <StatCard
           label="Available"
@@ -145,53 +133,6 @@ export default function EarningsPage() {
           icon="✅"
           variant="default"
         />
-        <StatCard
-          label="Projected (30d)"
-          value={`$${(projectedMonthlyEarnings / 100).toFixed(2)}`}
-          icon="📈"
-          variant="warning"
-        />
-      </div>
-
-      {/* Economic Opportunity Banner */}
-      <div className="mb-8 p-8 bg-gradient-to-br from-purple-500/20 to-blue-500/20 border-2 border-purple-500/30 rounded-2xl relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-blue-600/5 animate-pulse" />
-        <div className="relative">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <div className="text-sm font-semibold text-purple-400 uppercase tracking-wide mb-2">
-                Economic Derivative
-              </div>
-              <h2 className="text-3xl font-bold mb-2">The Circular Economy</h2>
-              <p className="text-zinc-300 max-w-2xl">
-                You're not just renting compute — you're earning from AI agent activity. 
-                Reinvest earnings into DeFi for compound returns. Early providers capture more network value.
-              </p>
-            </div>
-            <div className="text-right">
-              <div className="text-5xl font-bold text-green-400">↗</div>
-              <div className="text-xs text-zinc-500 mt-1">Network Effects</div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-6 mt-6">
-            <div className="text-center p-4 bg-zinc-900/50 rounded-lg border border-zinc-700">
-              <div className="text-3xl mb-2">⚡</div>
-              <div className="text-sm text-zinc-400">Agents execute</div>
-              <div className="text-lg font-bold text-blue-400">→ You earn</div>
-            </div>
-            <div className="text-center p-4 bg-zinc-900/50 rounded-lg border border-zinc-700">
-              <div className="text-3xl mb-2">💎</div>
-              <div className="text-sm text-zinc-400">Reinvest in DeFi</div>
-              <div className="text-lg font-bold text-purple-400">→ Compound</div>
-            </div>
-            <div className="text-center p-4 bg-zinc-900/50 rounded-lg border border-zinc-700">
-              <div className="text-3xl mb-2">🚀</div>
-              <div className="text-sm text-zinc-400">Network grows</div>
-              <div className="text-lg font-bold text-green-400">→ More value</div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
@@ -265,34 +206,13 @@ export default function EarningsPage() {
                 ))}
               </div>
 
-              {selectedStrategy && (
-                <div className="mt-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-green-400 text-lg">💡</span>
-                    <span className="font-semibold text-green-400">Projected Returns</span>
-                  </div>
-                  <div className="text-sm text-zinc-300">
-                    With <span className="font-semibold">${(pendingWithdrawal / 100).toFixed(2)}</span> at{' '}
-                    <span className="font-semibold">{selectedStrategyAPY}% APY</span>:
-                  </div>
-                  <div className="text-2xl font-bold text-green-400 mt-2">
-                    +${(yearlyCompound / 100).toFixed(2)} / year
-                  </div>
-                  <div className="text-xs text-zinc-500 mt-1">
-                    Compound interest on your compute earnings
-                  </div>
-                </div>
-              )}
-
               <div className="mt-6 flex gap-3">
                 <Button variant="primary" className="flex-1" disabled={!selectedStrategy}>
                   Deploy Strategy
                 </Button>
-                <Link href="/reinvest" className="flex-1">
-                  <Button variant="ghost" className="w-full">
-                    Advanced Strategies →
-                  </Button>
-                </Link>
+                <Button variant="ghost" className="flex-1">
+                  Learn More
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -322,13 +242,13 @@ export default function EarningsPage() {
                         <div>
                           <div className="font-mono text-sm text-zinc-500">{settlement.id.slice(0, 20)}...</div>
                           <div className="text-xs text-zinc-600 mt-1">
-                            Session: {settlement.sessionId.slice(0, 15)}...
+                            {new Date(settlement.settledAt).toLocaleString()}
                           </div>
                         </div>
                         <Badge variant="success">Settled</Badge>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-2 gap-4">
                         <div>
                           <div className="text-xs text-zinc-500">Total</div>
                           <div className="text-sm font-semibold">${(settlement.totalAmount / 100).toFixed(2)}</div>
@@ -338,10 +258,6 @@ export default function EarningsPage() {
                           <div className="text-sm font-semibold text-green-400">
                             ${(settlement.providerPayout / 100).toFixed(2)}
                           </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-zinc-500">Date</div>
-                          <div className="text-sm">{new Date(settlement.settledAt).toLocaleDateString()}</div>
                         </div>
                       </div>
                     </div>
@@ -357,7 +273,7 @@ export default function EarningsPage() {
           {/* Withdrawal Card */}
           <Card>
             <CardHeader>
-              <CardTitle>Withdraw Earnings</CardTitle>
+              <CardTitle>Withdraw</CardTitle>
             </CardHeader>
             <CardContent>
               <PriceDisplay
@@ -372,47 +288,7 @@ export default function EarningsPage() {
                 Withdraw to Wallet
               </Button>
               <div className="text-xs text-center text-zinc-600">
-                Instant USDC transfer to your wallet
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Early Provider Advantage */}
-          <Card className="border-2 border-yellow-500/30 bg-yellow-500/5">
-            <CardHeader>
-              <CardTitle className="text-yellow-400">Early Provider Advantage</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4 text-sm">
-                <div>
-                  <div className="font-semibold mb-1">Network Effects</div>
-                  <div className="text-zinc-400">
-                    More agents → higher demand → premium pricing
-                  </div>
-                </div>
-
-                <div>
-                  <div className="font-semibold mb-1">Reputation Building</div>
-                  <div className="text-zinc-400">
-                    High uptime now = trust advantage later
-                  </div>
-                </div>
-
-                <div>
-                  <div className="font-semibold mb-1">Compound Returns</div>
-                  <div className="text-zinc-400">
-                    Reinvest early → maximize time in DeFi
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-yellow-500/20">
-                  <div className="text-yellow-400 font-bold text-lg mb-1">
-                    Up to 3x advantage
-                  </div>
-                  <div className="text-xs text-zinc-500">
-                    vs providers joining 6 months later
-                  </div>
-                </div>
+                Instant USDC transfer
               </div>
             </CardContent>
           </Card>
@@ -420,7 +296,7 @@ export default function EarningsPage() {
           {/* Stats */}
           <Card>
             <CardHeader>
-              <CardTitle>Your Stats</CardTitle>
+              <CardTitle>Stats</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3 text-sm">
@@ -429,20 +305,12 @@ export default function EarningsPage() {
                   <span className="font-semibold">{settlements.length}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Avg. payout</span>
-                  <span className="font-semibold text-green-400">
-                    ${(avgSessionValue / 100).toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Platform fee paid</span>
-                  <span className="font-semibold">
-                    ${((totalEarnings * 0.07) / 100).toFixed(2)}
-                  </span>
+                  <span className="text-zinc-500">Platform fee</span>
+                  <span className="font-semibold text-zinc-400">7%</span>
                 </div>
                 <div className="flex justify-between pt-3 border-t border-zinc-800">
                   <span className="text-zinc-500">Your share</span>
-                  <span className="font-bold text-lg">90%</span>
+                  <span className="font-bold text-lg text-green-400">90%</span>
                 </div>
               </div>
             </CardContent>
