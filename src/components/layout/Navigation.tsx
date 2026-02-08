@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { NETWORK_INFO } from '@/lib/wallet/config';
 
 const navLinks = [
   { href: '/marketplace', label: 'Marketplace' },
@@ -21,6 +22,11 @@ export function Navigation() {
         <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <Image src="/logo.png" alt="ORIEN" width={32} height={32} className="opacity-90" />
           <span className="text-lg font-semibold tracking-wider text-white">ORIEN</span>
+          {NETWORK_INFO.isTestnet && (
+            <span className="px-2 py-0.5 text-[10px] font-bold bg-yellow-500/20 text-yellow-400 rounded uppercase tracking-wider">
+              Testnet
+            </span>
+          )}
         </Link>
         
         <div className="hidden md:flex items-center gap-8 text-sm">

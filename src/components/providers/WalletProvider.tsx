@@ -3,7 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
-import { config } from '@/lib/wallet/config';
+import { config, NETWORK_INFO } from '@/lib/wallet/config';
 
 import '@rainbow-me/rainbowkit/styles.css';
 
@@ -15,10 +15,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
           theme={darkTheme({
-            accentColor: '#3b82f6',
-            accentColorForeground: 'white',
+            accentColor: '#00F5FF',
+            accentColorForeground: '#0A1128',
             borderRadius: 'medium',
           })}
+          initialChain={NETWORK_INFO.defaultChain}
+          showRecentTransactions={true}
         >
           {children}
         </RainbowKitProvider>
@@ -26,3 +28,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     </WagmiProvider>
   );
 }
+
+// Export network info for components
+export { NETWORK_INFO };
