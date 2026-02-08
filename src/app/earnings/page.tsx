@@ -1,17 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { 
-  Button, 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardContent, 
-  PriceDisplay,
-  StatCard,
-  Badge 
-} from '@/components/ui';
+import { PageWrapper } from '@/components/layout';
 
 interface Settlement {
   id: string;
@@ -92,63 +82,65 @@ export default function EarningsPage() {
   const totalEarnings = settlements.reduce((sum, s) => sum + s.providerPayout, 0);
   const pendingWithdrawal = totalEarnings;
 
+  const riskColors = {
+    low: 'bg-green-500/20 text-green-400 border-green-500/30',
+    medium: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+    high: 'bg-red-500/20 text-red-400 border-red-500/30',
+  };
+
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="text-center py-16">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-zinc-700 border-t-blue-500 mb-4"></div>
-          <p className="text-zinc-500">Loading earnings...</p>
+      <PageWrapper>
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="flex items-center justify-center py-16">
+            <div className="w-8 h-8 border-2 border-[#00F5FF]/30 border-t-[#00F5FF] rounded-full animate-spin" />
+          </div>
         </div>
-      </div>
+      </PageWrapper>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Provider Earnings</h1>
-        <p className="text-zinc-500">
-          Track revenue from compute rental
-        </p>
-      </div>
+    <PageWrapper>
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-3">
+            <span className="bg-gradient-to-r from-[#00F5FF] via-white to-[#00F5FF] bg-clip-text text-transparent">
+              Provider Earnings
+            </span>
+          </h1>
+          <p className="text-[#A2AAAD]">Track revenue from compute rental and manage reinvestment strategies</p>
+        </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <StatCard
-          label="Total Earned"
-          value={`$${(totalEarnings / 100).toFixed(2)}`}
-          icon="💰"
-          variant="success"
-        />
-        <StatCard
-          label="Available"
-          value={`$${(pendingWithdrawal / 100).toFixed(2)}`}
-          icon="💵"
-          variant="info"
-        />
-        <StatCard
-          label="Settlements"
-          value={settlements.length}
-          icon="✅"
-          variant="default"
-        />
-      </div>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          {[
+            { label: 'Total Earned', value: `$${(totalEarnings / 100).toFixed(2)}`, icon: '💰', color: 'text-green-400' },
+            { label: 'Available', value: `$${(pendingWithdrawal / 100).toFixed(2)}`, icon: '💵', color: 'text-[#00F5FF]' },
+            { label: 'Settlements', value: settlements.length, icon: '✅', color: 'text-white' },
+          ].map((stat, i) => (
+            <div key={i} className="p-6 bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 text-center">
+              <div className="text-3xl mb-2">{stat.icon}</div>
+              <div className={`text-3xl font-bold ${stat.color}`}>{stat.value}</div>
+              <div className="text-sm text-[#A2AAAD] mt-1">{stat.label}</div>
+            </div>
+          ))}
+        </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Reinvestment Strategies */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Reinvestment Strategies</CardTitle>
+        <div className="grid gap-8 lg:grid-cols-3">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Reinvestment Strategies */}
+            <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 overflow-hidden">
+              <div className="px-6 py-4 border-b border-[#A2AAAD]/10 flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-white">Reinvestment Strategies</h2>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-zinc-500">Auto-reinvest</span>
+                  <span className="text-sm text-[#A2AAAD]">Auto-reinvest</span>
                   <button
                     onClick={() => setAutoReinvest(!autoReinvest)}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      autoReinvest ? 'bg-green-600' : 'bg-zinc-700'
+                      autoReinvest ? 'bg-[#00F5FF]' : 'bg-[#A2AAAD]/30'
                     }`}
                   >
                     <span
@@ -159,164 +151,160 @@ export default function EarningsPage() {
                   </button>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
+              <div className="p-6 space-y-3">
                 {STRATEGIES.map(strategy => (
                   <div
                     key={strategy.id}
                     onClick={() => setSelectedStrategy(strategy.id)}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
                       selectedStrategy === strategy.id
-                        ? 'border-purple-500 bg-purple-500/10'
-                        : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
+                        ? 'border-[#00F5FF] bg-[#00F5FF]/10'
+                        : 'border-[#A2AAAD]/10 hover:border-[#A2AAAD]/30'
                     }`}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-3">
                         <span className="text-3xl">{strategy.icon}</span>
                         <div>
-                          <div className="font-semibold">{strategy.name}</div>
-                          <div className="text-xs text-zinc-500">{strategy.protocol}</div>
+                          <div className="font-semibold text-white">{strategy.name}</div>
+                          <div className="text-xs text-[#A2AAAD]">{strategy.protocol}</div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-green-400">{strategy.apy}%</div>
-                        <div className="text-xs text-zinc-500">APY</div>
+                        <div className="text-xs text-[#A2AAAD]">APY</div>
                       </div>
                     </div>
 
-                    <p className="text-sm text-zinc-400 mb-3">{strategy.description}</p>
+                    <p className="text-sm text-[#A2AAAD] mb-3">{strategy.description}</p>
 
                     <div className="flex items-center justify-between">
-                      <Badge 
-                        variant={
-                          strategy.risk === 'low' ? 'success' :
-                          strategy.risk === 'medium' ? 'warning' :
-                          'danger'
-                        }
-                      >
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${riskColors[strategy.risk]}`}>
                         {strategy.risk} risk
-                      </Badge>
+                      </span>
                       {selectedStrategy === strategy.id && (
-                        <span className="text-xs text-purple-400 font-semibold">✓ Selected</span>
+                        <span className="text-xs text-[#00F5FF] font-semibold">✓ Selected</span>
                       )}
                     </div>
                   </div>
                 ))}
-              </div>
 
-              <div className="mt-6 flex gap-3">
-                <Button variant="primary" className="flex-1" disabled={!selectedStrategy}>
-                  Deploy Strategy
-                </Button>
-                <Button variant="ghost" className="flex-1">
-                  Learn More
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Settlement History */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Settlement History</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {settlements.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-4xl mb-4 opacity-20">💰</div>
-                  <div className="text-zinc-500">No settlements yet</div>
-                  <div className="text-sm text-zinc-600 mt-1">
-                    Complete sessions to start earning
-                  </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    disabled={!selectedStrategy}
+                    className={`flex-1 px-6 py-3 text-sm font-medium rounded-full transition-all ${
+                      selectedStrategy
+                        ? 'bg-[#00F5FF] text-[#0A1128] hover:shadow-[0_0_20px_rgba(0,245,255,0.3)]'
+                        : 'bg-[#A2AAAD]/20 text-[#A2AAAD] cursor-not-allowed'
+                    }`}
+                  >
+                    Deploy Strategy
+                  </button>
+                  <button className="flex-1 px-6 py-3 text-sm font-medium border border-[#A2AAAD]/30 text-[#A2AAAD] rounded-full hover:border-[#00F5FF]/50 hover:text-[#00F5FF] transition-all">
+                    Learn More
+                  </button>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {settlements.map(settlement => (
-                    <div 
-                      key={settlement.id}
-                      className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <div className="font-mono text-sm text-zinc-500">{settlement.id.slice(0, 20)}...</div>
-                          <div className="text-xs text-zinc-600 mt-1">
-                            {new Date(settlement.settledAt).toLocaleString()}
-                          </div>
-                        </div>
-                        <Badge variant="success">Settled</Badge>
-                      </div>
+              </div>
+            </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <div className="text-xs text-zinc-500">Total</div>
-                          <div className="text-sm font-semibold">${(settlement.totalAmount / 100).toFixed(2)}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-zinc-500">Your Payout (90%)</div>
-                          <div className="text-sm font-semibold text-green-400">
-                            ${(settlement.providerPayout / 100).toFixed(2)}
-                          </div>
-                        </div>
-                      </div>
+            {/* Settlement History */}
+            <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 overflow-hidden">
+              <div className="px-6 py-4 border-b border-[#A2AAAD]/10">
+                <h2 className="text-xl font-semibold text-white">Settlement History</h2>
+              </div>
+              <div className="p-6">
+                {settlements.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-4xl mb-4 opacity-20">💰</div>
+                    <div className="text-[#A2AAAD]">No settlements yet</div>
+                    <div className="text-sm text-[#A2AAAD]/60 mt-1">
+                      Complete sessions to start earning
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {settlements.map(settlement => (
+                      <div 
+                        key={settlement.id}
+                        className="p-4 bg-[#0A1128]/40 rounded-xl border border-[#A2AAAD]/10 hover:border-[#00F5FF]/20 transition-colors"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <div className="font-mono text-sm text-[#A2AAAD]">{settlement.id.slice(0, 20)}...</div>
+                            <div className="text-xs text-[#A2AAAD]/60 mt-1">
+                              {new Date(settlement.settledAt).toLocaleString()}
+                            </div>
+                          </div>
+                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">
+                            Settled
+                          </span>
+                        </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Withdrawal Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Withdraw</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PriceDisplay
-                amountCents={pendingWithdrawal}
-                label="Available"
-                size="lg"
-                variant="success"
-                className="mb-6"
-              />
-
-              <Button variant="primary" className="w-full mb-3">
-                Withdraw to Wallet
-              </Button>
-              <div className="text-xs text-center text-zinc-600">
-                Instant USDC transfer
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <div className="text-xs text-[#A2AAAD]">Total</div>
+                            <div className="text-sm font-semibold text-white">${(settlement.totalAmount / 100).toFixed(2)}</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-[#A2AAAD]">Your Payout (90%)</div>
+                            <div className="text-sm font-semibold text-green-400">
+                              ${(settlement.providerPayout / 100).toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {/* Stats */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Stats</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Sessions served</span>
-                  <span className="font-semibold">{settlements.length}</span>
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Withdrawal Card */}
+            <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 overflow-hidden">
+              <div className="px-6 py-4 border-b border-[#A2AAAD]/10">
+                <h2 className="text-lg font-semibold text-white">Withdraw</h2>
+              </div>
+              <div className="p-6">
+                <div className="text-center mb-6">
+                  <div className="text-xs text-[#A2AAAD] mb-1">Available</div>
+                  <div className="text-4xl font-bold text-green-400">${(pendingWithdrawal / 100).toFixed(2)}</div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Platform fee</span>
-                  <span className="font-semibold text-zinc-400">7%</span>
-                </div>
-                <div className="flex justify-between pt-3 border-t border-zinc-800">
-                  <span className="text-zinc-500">Your share</span>
-                  <span className="font-bold text-lg text-green-400">90%</span>
+
+                <button className="w-full px-6 py-3 text-sm font-medium bg-[#00F5FF] text-[#0A1128] rounded-full hover:shadow-[0_0_20px_rgba(0,245,255,0.3)] transition-all mb-3">
+                  Withdraw to Wallet
+                </button>
+                <div className="text-xs text-center text-[#A2AAAD]/60">
+                  Instant USDC transfer
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+
+            {/* Stats */}
+            <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 overflow-hidden">
+              <div className="px-6 py-4 border-b border-[#A2AAAD]/10">
+                <h2 className="text-lg font-semibold text-white">Stats</h2>
+              </div>
+              <div className="p-6 space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-[#A2AAAD]">Sessions served</span>
+                  <span className="font-semibold text-white">{settlements.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#A2AAAD]">Platform fee</span>
+                  <span className="font-semibold text-[#A2AAAD]">7%</span>
+                </div>
+                <div className="flex justify-between pt-3 border-t border-[#A2AAAD]/10">
+                  <span className="text-[#A2AAAD]">Your share</span>
+                  <span className="font-bold text-lg text-[#00F5FF]">90%</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

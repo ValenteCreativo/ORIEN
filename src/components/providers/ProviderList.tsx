@@ -45,27 +45,27 @@ export function ProviderList({ availableOnly = false }: ProviderListProps) {
 
   if (loading) {
     return (
-      <div className="text-center py-16">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray/30 border-t-cyan"></div>
-        <p className="mt-4 text-gray">Loading providers...</p>
+      <div className="flex items-center justify-center py-16">
+        <div className="w-8 h-8 border-2 border-[#00F5FF]/30 border-t-[#00F5FF] rounded-full animate-spin" />
       </div>
     );
   }
 
   if (error && !demoMode) {
     return (
-      <div className="text-center py-16">
+      <div className="text-center py-16 bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-red-500/20">
         <div className="text-red-400 mb-2">⚠️ Error loading providers</div>
-        <p className="text-sm text-gray">{error}</p>
+        <p className="text-sm text-[#A2AAAD]">{error}</p>
       </div>
     );
   }
 
   if (providers.length === 0) {
     return (
-      <div className="text-center py-16 text-gray">
-        <p className="text-lg mb-4">No providers available</p>
-        <p className="text-sm">
+      <div className="text-center py-16 bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10">
+        <div className="text-4xl mb-4 opacity-40">◎</div>
+        <p className="text-lg text-white mb-2">No providers available</p>
+        <p className="text-sm text-[#A2AAAD]">
           {availableOnly 
             ? 'All providers are currently offline or busy. Check back soon.'
             : demoMode 
@@ -84,8 +84,8 @@ export function ProviderList({ availableOnly = false }: ProviderListProps) {
       ))}
       
       {demoMode && (
-        <div className="text-center py-4 text-cyan text-sm border-t border-cyan/20">
-          ● Demo Mode Active - Showing {providers.length} simulated providers
+        <div className="text-center py-4 text-[#00F5FF] text-sm border-t border-[#00F5FF]/20">
+          ● Demo Mode Active — Showing {providers.length} simulated providers
         </div>
       )}
     </div>

@@ -3,18 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Session, Provider, ApiResponse } from '@/types';
-import { 
-  Button, 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardContent, 
-  Badge, 
-  PriceDisplay,
-  ProgressBar,
-  StatCard 
-} from '@/components/ui';
-import { TrustIndicators } from '@/components/providers';
+import { PageWrapper } from '@/components/layout';
 
 export default function SessionDetailPage() {
   const params = useParams();
@@ -54,37 +43,41 @@ export default function SessionDetailPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="text-center py-16">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-zinc-700 border-t-blue-500 mb-4"></div>
-          <p className="text-zinc-500">Loading session...</p>
+      <PageWrapper>
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="flex items-center justify-center py-16">
+            <div className="w-8 h-8 border-2 border-[#00F5FF]/30 border-t-[#00F5FF] rounded-full animate-spin" />
+          </div>
         </div>
-      </div>
+      </PageWrapper>
     );
   }
 
   if (error || !session) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <Card>
-          <CardContent className="text-center py-8">
+      <PageWrapper>
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-red-500/20 p-8 text-center">
             <div className="text-red-400 text-lg mb-2">⚠️ Error</div>
-            <p className="text-zinc-500">{error || 'Session not found'}</p>
-            <Button variant="secondary" className="mt-4" onClick={() => router.push('/sessions')}>
+            <p className="text-[#A2AAAD]">{error || 'Session not found'}</p>
+            <button 
+              onClick={() => router.push('/sessions')}
+              className="mt-6 px-6 py-2.5 text-sm font-medium border border-[#A2AAAD]/30 text-[#A2AAAD] rounded-full hover:border-[#00F5FF]/50 hover:text-[#00F5FF] transition-all"
+            >
               Back to Sessions
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+            </button>
+          </div>
+        </div>
+      </PageWrapper>
     );
   }
 
   const statusConfig = {
-    pending: { variant: 'warning' as const, icon: '⏳', label: 'Pending' },
-    active: { variant: 'success' as const, icon: '▶', label: 'Active' },
-    completed: { variant: 'info' as const, icon: '✓', label: 'Completed' },
-    failed: { variant: 'danger' as const, icon: '✗', label: 'Failed' },
-    settled: { variant: 'default' as const, icon: '💰', label: 'Settled' },
+    pending: { color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', icon: '⏳', label: 'Pending' },
+    active: { color: 'bg-green-500/20 text-green-400 border-green-500/30', icon: '▶', label: 'Active' },
+    completed: { color: 'bg-[#00F5FF]/20 text-[#00F5FF] border-[#00F5FF]/30', icon: '✓', label: 'Completed' },
+    failed: { color: 'bg-red-500/20 text-red-400 border-red-500/30', icon: '✗', label: 'Failed' },
+    settled: { color: 'bg-purple-500/20 text-purple-400 border-purple-500/30', icon: '💰', label: 'Settled' },
   };
 
   const status = statusConfig[session.status];
@@ -92,110 +85,95 @@ export default function SessionDetailPage() {
   const budgetPercentage = (session.consumed / session.budgetAllowance) * 100;
   const effectiveMinutes = (session.effectiveTimeMs / 1000 / 60).toFixed(2);
 
+  const execStatusColors: Record<string, string> = {
+    pending: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400',
+    running: 'bg-[#00F5FF]/10 border-[#00F5FF]/20 text-[#00F5FF]',
+    completed: 'bg-green-500/10 border-green-500/20 text-green-400',
+    failed: 'bg-red-500/10 border-red-500/20 text-red-400',
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-4">
-            <h1 className="text-4xl font-bold">Session</h1>
-            <Badge variant={status.variant} className="text-base px-3 py-1">
-              <span className="mr-2">{status.icon}</span>
-              {status.label}
-            </Badge>
-          </div>
-          {session.status === 'active' && (
-            <div className="flex items-center gap-2 text-sm text-zinc-500">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              Session running
+    <PageWrapper>
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-4">
+              <h1 className="text-4xl font-bold text-white">Session</h1>
+              <span className={`px-3 py-1.5 rounded-full text-sm font-medium border ${status.color}`}>
+                <span className="mr-2">{status.icon}</span>
+                {status.label}
+              </span>
             </div>
-          )}
+            {session.status === 'active' && (
+              <div className="flex items-center gap-2 text-sm text-[#A2AAAD]">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                Session running
+              </div>
+            )}
+          </div>
+          <p className="text-sm text-[#A2AAAD]/60 font-mono">{session.id}</p>
         </div>
-        <p className="text-sm text-zinc-500 font-mono">{session.id}</p>
-      </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <StatCard
-          label="Budget Consumed"
-          value={`$${(session.consumed / 100).toFixed(2)}`}
-          icon="💸"
-          variant={budgetPercentage > 80 ? 'danger' : budgetPercentage > 50 ? 'warning' : 'success'}
-          trend={budgetPercentage > 0 ? 'up' : 'neutral'}
-          trendValue={`${budgetPercentage.toFixed(1)}%`}
-        />
-        <StatCard
-          label="Budget Remaining"
-          value={`$${(budgetRemaining / 100).toFixed(2)}`}
-          icon="💰"
-          variant="info"
-        />
-        <StatCard
-          label="Effective Time"
-          value={`${effectiveMinutes}m`}
-          icon="⏱"
-          variant="default"
-        />
-        <StatCard
-          label="Executions"
-          value={session.executions?.length || 0}
-          icon="⚡"
-          variant="default"
-        />
-      </div>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          {[
+            { label: 'Budget Consumed', value: `$${(session.consumed / 100).toFixed(2)}`, icon: '💸', color: budgetPercentage > 80 ? 'text-red-400' : 'text-[#00F5FF]' },
+            { label: 'Budget Remaining', value: `$${(budgetRemaining / 100).toFixed(2)}`, icon: '💰', color: 'text-green-400' },
+            { label: 'Effective Time', value: `${effectiveMinutes}m`, icon: '⏱', color: 'text-white' },
+            { label: 'Executions', value: session.executions?.length || 0, icon: '⚡', color: 'text-[#00F5FF]' },
+          ].map((stat, i) => (
+            <div key={i} className="p-5 bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 text-center">
+              <div className="text-2xl mb-2">{stat.icon}</div>
+              <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
+              <div className="text-xs text-[#A2AAAD] mt-1">{stat.label}</div>
+            </div>
+          ))}
+        </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
-        {/* Main Content - 2 columns */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Budget Visualization */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Budget Overview</span>
-                <span className="text-sm font-normal text-zinc-500">
-                  ${(session.budgetAllowance / 100).toFixed(2)} total
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {/* Main progress */}
-                <ProgressBar
-                  value={session.consumed}
-                  max={session.budgetAllowance}
-                  label="Consumption"
-                  variant={
-                    budgetPercentage > 90 ? 'danger' :
-                    budgetPercentage > 70 ? 'warning' :
-                    'success'
-                  }
-                  size="lg"
-                  animated={session.status === 'active'}
-                />
-
-                {/* Budget breakdown */}
-                <div className="grid grid-cols-2 gap-4 pt-4">
-                  <div>
-                    <PriceDisplay
-                      amountCents={session.consumed}
-                      label="Consumed"
-                      size="md"
-                      variant="danger"
+        <div className="grid gap-8 lg:grid-cols-3">
+          {/* Main Content - 2 columns */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Budget Visualization */}
+            <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 overflow-hidden">
+              <div className="px-6 py-4 border-b border-[#A2AAAD]/10 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-white">Budget Overview</h2>
+                <span className="text-sm text-[#A2AAAD]">${(session.budgetAllowance / 100).toFixed(2)} total</span>
+              </div>
+              <div className="p-6 space-y-6">
+                {/* Progress bar */}
+                <div>
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span className="text-[#A2AAAD]">Consumption</span>
+                    <span className="text-white font-medium">{budgetPercentage.toFixed(1)}%</span>
+                  </div>
+                  <div className="h-3 bg-[#A2AAAD]/10 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full transition-all duration-500 ${
+                        budgetPercentage > 90 ? 'bg-red-500' :
+                        budgetPercentage > 70 ? 'bg-yellow-500' :
+                        'bg-gradient-to-r from-[#00F5FF] to-[#00F5FF]/60'
+                      } ${session.status === 'active' ? 'animate-pulse' : ''}`}
+                      style={{ width: `${Math.min(100, budgetPercentage)}%` }}
                     />
                   </div>
-                  <div>
-                    <PriceDisplay
-                      amountCents={budgetRemaining}
-                      label="Remaining"
-                      size="md"
-                      variant="success"
-                    />
+                </div>
+
+                {/* Budget breakdown */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-[#0A1128]/40 rounded-xl border border-red-500/10">
+                    <div className="text-xs text-[#A2AAAD] mb-1">Consumed</div>
+                    <div className="text-2xl font-bold text-red-400">${(session.consumed / 100).toFixed(2)}</div>
+                  </div>
+                  <div className="p-4 bg-[#0A1128]/40 rounded-xl border border-green-500/10">
+                    <div className="text-xs text-[#A2AAAD] mb-1">Remaining</div>
+                    <div className="text-2xl font-bold text-green-400">${(budgetRemaining / 100).toFixed(2)}</div>
                   </div>
                 </div>
 
                 {/* Warning if low budget */}
                 {budgetPercentage > 80 && session.status === 'active' && (
-                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
                     <div className="flex items-start gap-3">
                       <span className="text-yellow-500 text-xl">⚠️</span>
                       <div>
@@ -208,60 +186,54 @@ export default function SessionDetailPage() {
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
 
-          {/* Execution History */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Execution History</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {session.executions && session.executions.length > 0 ? (
-                <div className="space-y-3">
-                  {session.executions.map(exec => {
-                    const execStatus = {
-                      pending: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/20', text: 'text-yellow-400' },
-                      running: { bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-400' },
-                      completed: { bg: 'bg-green-500/10', border: 'border-green-500/20', text: 'text-green-400' },
-                      failed: { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400' },
-                    };
-                    const style = execStatus[exec.status];
-
-                    return (
+            {/* Execution History */}
+            <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 overflow-hidden">
+              <div className="px-6 py-4 border-b border-[#A2AAAD]/10">
+                <h2 className="text-lg font-semibold text-white">Execution History</h2>
+              </div>
+              <div className="p-6">
+                {session.executions && session.executions.length > 0 ? (
+                  <div className="space-y-3">
+                    {session.executions.map(exec => (
                       <div 
                         key={exec.id}
-                        className={`p-4 ${style.bg} border ${style.border} rounded-lg hover:${style.border.replace('/20', '/40')} transition-colors`}
+                        className={`p-4 rounded-xl border ${execStatusColors[exec.status]} transition-colors`}
                       >
                         <div className="flex items-start justify-between mb-3">
                           <div>
-                            <div className="font-semibold text-lg mb-1">{exec.toolId}</div>
-                            <div className="text-xs text-zinc-500 font-mono">{exec.id}</div>
+                            <div className="font-semibold text-lg text-white mb-1">{exec.toolId}</div>
+                            <div className="text-xs text-[#A2AAAD]/60 font-mono">{exec.id}</div>
                           </div>
-                          <Badge variant={exec.status === 'completed' ? 'success' : exec.status === 'failed' ? 'danger' : 'warning'}>
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                            exec.status === 'completed' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                            exec.status === 'failed' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
+                            'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                          }`}>
                             {exec.status}
-                          </Badge>
+                          </span>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
-                            <span className="text-zinc-500">Started:</span>
-                            <span className="ml-2 text-zinc-300">
+                            <span className="text-[#A2AAAD]">Started:</span>
+                            <span className="ml-2 text-white">
                               {new Date(exec.startedAt).toLocaleTimeString()}
                             </span>
                           </div>
                           {exec.durationMs && (
                             <div>
-                              <span className="text-zinc-500">Duration:</span>
-                              <span className="ml-2 text-zinc-300">
+                              <span className="text-[#A2AAAD]">Duration:</span>
+                              <span className="ml-2 text-white">
                                 {(exec.durationMs / 1000).toFixed(1)}s
                               </span>
                             </div>
                           )}
                           {exec.cost && (
                             <div>
-                              <span className="text-zinc-500">Cost:</span>
-                              <span className={`ml-2 font-semibold ${style.text}`}>
+                              <span className="text-[#A2AAAD]">Cost:</span>
+                              <span className="ml-2 font-semibold text-[#00F5FF]">
                                 ${(exec.cost / 100).toFixed(2)}
                               </span>
                             </div>
@@ -271,125 +243,121 @@ export default function SessionDetailPage() {
                         {/* Args */}
                         {Object.keys(exec.args).length > 0 && (
                           <details className="mt-3 text-xs">
-                            <summary className="cursor-pointer text-zinc-500 hover:text-zinc-400">
+                            <summary className="cursor-pointer text-[#A2AAAD] hover:text-[#00F5FF] transition-colors">
                               View arguments
                             </summary>
-                            <pre className="mt-2 p-2 bg-zinc-900 rounded text-zinc-400 overflow-x-auto">
+                            <pre className="mt-2 p-3 bg-[#0A1128] rounded-lg text-[#A2AAAD] overflow-x-auto border border-[#A2AAAD]/10">
                               {JSON.stringify(exec.args, null, 2)}
                             </pre>
                           </details>
                         )}
                       </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="text-4xl mb-4 opacity-20">⚡</div>
-                  <div className="text-zinc-500">No executions yet</div>
-                  <div className="text-sm text-zinc-600 mt-1">
-                    Execute tools to see history here
+                    ))}
                   </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="text-4xl mb-4 opacity-20">⚡</div>
+                    <div className="text-[#A2AAAD]">No executions yet</div>
+                    <div className="text-sm text-[#A2AAAD]/60 mt-1">
+                      Execute tools to see history here
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
-        {/* Sidebar - 1 column */}
-        <div className="space-y-6">
-          {/* Provider Info */}
-          {provider && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Provider</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+          {/* Sidebar - 1 column */}
+          <div className="space-y-6">
+            {/* Provider Info */}
+            {provider && (
+              <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 overflow-hidden">
+                <div className="px-6 py-4 border-b border-[#A2AAAD]/10">
+                  <h2 className="text-lg font-semibold text-white">Provider</h2>
+                </div>
+                <div className="p-6 space-y-4">
                   <div>
-                    <div className="font-bold text-xl mb-1">{provider.name}</div>
-                    <div className="text-xs text-zinc-500 font-mono">{provider.id}</div>
+                    <div className="font-bold text-xl text-white mb-1">{provider.name}</div>
+                    <div className="text-xs text-[#A2AAAD]/60 font-mono">{provider.id}</div>
                   </div>
 
-                  <div className="pt-4 border-t border-zinc-800">
-                    <PriceDisplay
-                      amountCents={provider.pricePerMinute}
-                      label="Rate"
-                      size="md"
-                    />
-                    <div className="text-xs text-zinc-600 mt-1">per effective minute</div>
+                  <div className="pt-4 border-t border-[#A2AAAD]/10">
+                    <div className="text-xs text-[#A2AAAD] mb-1">Rate</div>
+                    <div className="text-2xl font-bold text-[#00F5FF]">${(provider.pricePerMinute / 100).toFixed(2)}</div>
+                    <div className="text-xs text-[#A2AAAD]/60">per effective minute</div>
                   </div>
 
-                  <div className="pt-4 border-t border-zinc-800">
-                    <TrustIndicators reputation={provider.reputation} />
+                  <div className="pt-4 border-t border-[#A2AAAD]/10 grid grid-cols-2 gap-3">
+                    <div>
+                      <div className="text-xs text-[#A2AAAD]">Uptime</div>
+                      <div className="text-lg font-semibold text-green-400">{provider.reputation.uptime}%</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-[#A2AAAD]">Sessions</div>
+                      <div className="text-lg font-semibold text-[#00F5FF]">{provider.reputation.completedSessions}</div>
+                    </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            )}
 
-          {/* Session Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Session Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm">
+            {/* Session Info */}
+            <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 overflow-hidden">
+              <div className="px-6 py-4 border-b border-[#A2AAAD]/10">
+                <h2 className="text-lg font-semibold text-white">Session Details</h2>
+              </div>
+              <div className="p-6 space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Agent ID</span>
-                  <span className="font-mono text-zinc-300">{session.agentId}</span>
+                  <span className="text-[#A2AAAD]">Agent ID</span>
+                  <span className="font-mono text-white">{session.agentId}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Created</span>
-                  <span className="text-zinc-300">
+                  <span className="text-[#A2AAAD]">Created</span>
+                  <span className="text-white">
                     {new Date(session.createdAt).toLocaleString()}
                   </span>
                 </div>
                 {session.endedAt && (
                   <div className="flex justify-between">
-                    <span className="text-zinc-500">Ended</span>
-                    <span className="text-zinc-300">
+                    <span className="text-[#A2AAAD]">Ended</span>
+                    <span className="text-white">
                       {new Date(session.endedAt).toLocaleString()}
                     </span>
                   </div>
                 )}
                 {session.settledAt && (
                   <div className="flex justify-between">
-                    <span className="text-zinc-500">Settled</span>
-                    <span className="text-zinc-300">
+                    <span className="text-[#A2AAAD]">Settled</span>
+                    <span className="text-white">
                       {new Date(session.settledAt).toLocaleString()}
                     </span>
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
 
-          {/* Actions */}
-          {session.status === 'active' && (
-            <Card>
-              <CardContent className="space-y-3">
-                <Button variant="primary" className="w-full">
+            {/* Actions */}
+            {session.status === 'active' && (
+              <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 p-6 space-y-3">
+                <button className="w-full px-6 py-3 text-sm font-medium bg-[#00F5FF] text-[#0A1128] rounded-full hover:shadow-[0_0_20px_rgba(0,245,255,0.3)] transition-all">
                   ⚡ Execute Tool
-                </Button>
-                <Button variant="danger" className="w-full">
+                </button>
+                <button className="w-full px-6 py-3 text-sm font-medium border border-red-500/30 text-red-400 rounded-full hover:bg-red-500/10 transition-all">
                   ⏹ End Session
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+                </button>
+              </div>
+            )}
 
-          {session.status === 'completed' && !session.settledAt && (
-            <Card>
-              <CardContent>
-                <Button variant="primary" className="w-full">
+            {session.status === 'completed' && !session.settledAt && (
+              <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 p-6">
+                <button className="w-full px-6 py-3 text-sm font-medium bg-[#00F5FF] text-[#0A1128] rounded-full hover:shadow-[0_0_20px_rgba(0,245,255,0.3)] transition-all">
                   💰 Settle & Pay
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

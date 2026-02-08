@@ -3,19 +3,20 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Provider, ApiResponse } from '@/types';
-import { Button, Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
+import { PageWrapper } from '@/components/layout';
 
 // Loading component for Suspense fallback
 function LoadingState() {
   return (
-    <div className="max-w-2xl mx-auto px-4 py-12">
-      <Card>
-        <CardContent className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-zinc-700 border-t-blue-500 mb-4"></div>
-          <p className="text-zinc-500">Loading...</p>
-        </CardContent>
-      </Card>
-    </div>
+    <PageWrapper>
+      <div className="max-w-2xl mx-auto px-6 py-12">
+        <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 p-8">
+          <div className="flex items-center justify-center py-8">
+            <div className="w-8 h-8 border-2 border-[#00F5FF]/30 border-t-[#00F5FF] rounded-full animate-spin" />
+          </div>
+        </div>
+      </div>
+    </PageWrapper>
   );
 }
 
@@ -83,141 +84,153 @@ function NewSessionContent() {
 
   if (error && !provider) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-12">
-        <Card>
-          <CardContent className="text-center py-8">
+      <PageWrapper>
+        <div className="max-w-2xl mx-auto px-6 py-12">
+          <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-red-500/20 p-8 text-center">
             <div className="text-red-400 text-lg mb-2">⚠️ Error</div>
-            <p className="text-zinc-500">{error}</p>
-            <Button variant="secondary" className="mt-4" onClick={() => router.push('/marketplace')}>
+            <p className="text-[#A2AAAD]">{error}</p>
+            <button 
+              onClick={() => router.push('/marketplace')}
+              className="mt-6 px-6 py-2.5 text-sm font-medium border border-[#A2AAAD]/30 text-[#A2AAAD] rounded-full hover:border-[#00F5FF]/50 hover:text-[#00F5FF] transition-all"
+            >
               Back to Marketplace
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+            </button>
+          </div>
+        </div>
+      </PageWrapper>
     );
   }
 
   if (!provider) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-12">
-        <Card>
-          <CardContent className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-zinc-700 border-t-blue-500 mb-4"></div>
-            <p className="text-zinc-500">Loading provider...</p>
-          </CardContent>
-        </Card>
-      </div>
+      <PageWrapper>
+        <div className="max-w-2xl mx-auto px-6 py-12">
+          <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 p-8">
+            <div className="flex items-center justify-center py-8">
+              <div className="w-8 h-8 border-2 border-[#00F5FF]/30 border-t-[#00F5FF] rounded-full animate-spin" />
+            </div>
+            <p className="text-center text-[#A2AAAD]">Loading provider...</p>
+          </div>
+        </div>
+      </PageWrapper>
     );
   }
 
   const estimatedTime = Math.floor(parseInt(budget, 10) / provider.pricePerMinute);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">Start New Session</h1>
+    <PageWrapper>
+      <div className="max-w-2xl mx-auto px-6 py-12">
+        <h1 className="text-3xl md:text-4xl font-bold text-white mb-8 text-center">Start New Session</h1>
 
-      {/* Provider Info */}
-      <Card className="mb-6">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Selected Provider</CardTitle>
-            <Badge variant={provider.status === 'online' ? 'success' : 'warning'}>
+        {/* Provider Info */}
+        <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 mb-6 overflow-hidden">
+          <div className="px-6 py-4 border-b border-[#A2AAAD]/10 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-white">Selected Provider</h2>
+            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
+              provider.status === 'online' 
+                ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+            }`}>
               {provider.status}
-            </Badge>
+            </span>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
+          <div className="p-6 space-y-4">
             <div>
-              <div className="text-2xl font-bold">{provider.name}</div>
-              <div className="text-sm text-zinc-500">{provider.id}</div>
+              <div className="text-2xl font-bold text-white">{provider.name}</div>
+              <div className="text-sm text-[#A2AAAD]/60 font-mono">{provider.id}</div>
             </div>
 
             <div className="flex items-center gap-6 text-sm">
               <div>
-                <span className="text-zinc-500">Price:</span>
-                <span className="ml-2 font-semibold text-blue-400">
+                <span className="text-[#A2AAAD]">Price:</span>
+                <span className="ml-2 font-semibold text-[#00F5FF]">
                   ${(provider.pricePerMinute / 100).toFixed(2)}/min
                 </span>
               </div>
               <div>
-                <span className="text-zinc-500">Tools:</span>
-                <span className="ml-2 font-semibold">{provider.tools.length}</span>
+                <span className="text-[#A2AAAD]">Tools:</span>
+                <span className="ml-2 font-semibold text-white">{provider.tools.length}</span>
               </div>
               <div>
-                <span className="text-zinc-500">Uptime:</span>
+                <span className="text-[#A2AAAD]">Uptime:</span>
                 <span className="ml-2 font-semibold text-green-400">
                   {provider.reputation.uptime}%
                 </span>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Budget Configuration */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Session Budget</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        {/* Budget Configuration */}
+        <div className="bg-[#0A1128]/60 backdrop-blur-sm rounded-xl border border-[#A2AAAD]/10 mb-6 overflow-hidden">
+          <div className="px-6 py-4 border-b border-[#A2AAAD]/10">
+            <h2 className="text-lg font-semibold text-white">Session Budget</h2>
+          </div>
+          <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm font-medium text-[#A2AAAD] mb-2">
                 Budget Allowance (USDC)
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-zinc-500">$</span>
+                <span className="text-2xl font-bold text-[#A2AAAD]">$</span>
                 <input
                   type="number"
                   value={parseInt(budget, 10) / 100}
                   onChange={(e) => setBudget(String(Math.round(parseFloat(e.target.value) * 100)))}
                   min="1"
                   step="1"
-                  className="flex-1 px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-xl font-semibold focus:outline-none focus:border-blue-500"
+                  className="flex-1 px-4 py-3 bg-[#0A1128] border border-[#A2AAAD]/20 rounded-xl text-xl font-semibold text-white focus:outline-none focus:border-[#00F5FF]/50 transition-colors"
                 />
               </div>
             </div>
 
-            <div className="p-4 bg-zinc-800 rounded-lg">
-              <div className="text-sm text-zinc-500 mb-1">Estimated execution time:</div>
-              <div className="text-2xl font-bold text-blue-400">
+            <div className="p-4 bg-[#00F5FF]/5 rounded-xl border border-[#00F5FF]/10">
+              <div className="text-sm text-[#A2AAAD] mb-1">Estimated execution time:</div>
+              <div className="text-2xl font-bold text-[#00F5FF]">
                 ~{estimatedTime} {estimatedTime === 1 ? 'minute' : 'minutes'}
               </div>
-              <div className="text-xs text-zinc-600 mt-1">
+              <div className="text-xs text-[#A2AAAD]/60 mt-1">
                 Based on provider&apos;s rate. Actual cost depends on effective execution time.
               </div>
             </div>
 
             {error && (
-              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
                 <div className="text-red-400 text-sm">{error}</div>
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-4">
-        <Button
-          variant="secondary"
-          onClick={() => router.push('/marketplace')}
-          disabled={loading}
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="primary"
-          onClick={handleCreateSession}
-          loading={loading}
-          disabled={provider.status !== 'online'}
-          className="flex-1"
-        >
-          {provider.status === 'online' ? 'Create Session' : 'Provider Unavailable'}
-        </Button>
+        {/* Actions */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => router.push('/marketplace')}
+            disabled={loading}
+            className="px-6 py-3 text-sm font-medium border border-[#A2AAAD]/30 text-[#A2AAAD] rounded-full hover:border-[#00F5FF]/50 hover:text-[#00F5FF] transition-all disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleCreateSession}
+            disabled={loading || provider.status !== 'online'}
+            className={`flex-1 px-6 py-3 text-sm font-medium rounded-full transition-all ${
+              provider.status === 'online' && !loading
+                ? 'bg-[#00F5FF] text-[#0A1128] hover:shadow-[0_0_20px_rgba(0,245,255,0.3)]'
+                : 'bg-[#A2AAAD]/20 text-[#A2AAAD] cursor-not-allowed'
+            }`}
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-[#0A1128]/30 border-t-[#0A1128] rounded-full animate-spin" />
+                Creating...
+              </span>
+            ) : provider.status === 'online' ? 'Create Session' : 'Provider Unavailable'}
+          </button>
+        </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }
 
