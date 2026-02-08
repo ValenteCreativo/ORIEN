@@ -319,9 +319,12 @@ export default function EarningsPage() {
 
               {selectedStrategy && (
                 <div className="px-4 pb-4">
-                  <button className="w-full py-2.5 text-sm font-medium bg-[#00F5FF] text-[#0A1128] rounded-full hover:shadow-[0_0_20px_rgba(0,245,255,0.3)] transition-all">
+                  <Link
+                    href={`/earnings/deploy?strategy=${selectedStrategy}`}
+                    className="block w-full py-2.5 text-sm font-medium bg-[#00F5FF] text-[#0A1128] rounded-full text-center hover:shadow-[0_0_20px_rgba(0,245,255,0.3)] transition-all"
+                  >
                     Deploy to {STRATEGIES.find(s => s.id === selectedStrategy)?.protocol}
-                  </button>
+                  </Link>
                 </div>
               )}
             </div>
